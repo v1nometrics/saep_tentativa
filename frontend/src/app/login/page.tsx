@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth, LoginCredentials } from '@/hooks/useAuth';
-import { useCsrfToken, CSRF_HEADER } from '@/lib/csrf';
+import { useAuth, LoginCredentials } from '../../hooks/useAuth';
+import { useCsrfToken, CSRF_HEADER } from '../../lib/csrf';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');

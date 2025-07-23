@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useErrorHandler } from './useErrorHandler';
-import { createError } from '@/lib/errorMessages';
-import { CSRF_HEADER } from '@/lib/csrf';
+import { createError } from '../lib/errorMessages';
+import { CSRF_HEADER } from '../lib/csrf';
 
 export interface LoginCredentials {
   email: string;
