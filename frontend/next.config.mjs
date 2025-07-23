@@ -1,8 +1,5 @@
 // @ts-nocheck
 // Desativando verificação de tipos temporariamente para este arquivo
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /**
  * @type {import('next').NextConfig}
@@ -60,12 +57,6 @@ const nextConfig = {
   webpack: (config, { isServer }) => {
     // Adiciona suporte para arquivos .mjs
     config.resolve.fallback = { fs: false, module: false };
-    
-    // Adiciona suporte para importação de módulos do diretório raiz
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      '@': path.resolve(__dirname, './src'),
-    };
     
     return config;
   },
