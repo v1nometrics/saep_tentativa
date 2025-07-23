@@ -1,5 +1,6 @@
 // @ts-nocheck
 // Desativando verificação de tipos temporariamente para este arquivo
+import path from 'node:path';
 
 /**
  * @type {import('next').NextConfig}
@@ -61,7 +62,7 @@ const nextConfig = {
     // Adiciona suporte para importação de módulos do diretório raiz
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@/': require('path').resolve(__dirname, './src/'),
+      '@/': path.resolve(__dirname, './src/'),
     };
     
     return config;
