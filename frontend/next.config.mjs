@@ -1,5 +1,6 @@
 // @ts-nocheck
 // Desativando verificação de tipos temporariamente para este arquivo
+import path from 'path';
 
 /**
  * @type {import('next').NextConfig}
@@ -57,6 +58,12 @@ const nextConfig = {
   webpack: (config, { isServer }) => {
     // Adiciona suporte para arquivos .mjs
     config.resolve.fallback = { fs: false, module: false };
+    
+    // Configuração explícita de alias para resolver @/* paths
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve('./src'),
+    };
     
     return config;
   },
