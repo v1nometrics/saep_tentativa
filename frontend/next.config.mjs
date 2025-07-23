@@ -1,6 +1,8 @@
 // @ts-nocheck
 // Desativando verificação de tipos temporariamente para este arquivo
-import path from 'path';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /**
  * @type {import('next').NextConfig}
@@ -14,9 +16,6 @@ const nextConfig = {
     // Habilita Server Actions
     serverActions: {},
   },
-  
-  // Pacotes externos para server components
-  serverExternalPackages: ['aws-sdk'],
   
   // Configuração de runtime para o middleware
   // (a configuração de runtime foi movida para o próprio middleware)
@@ -58,38 +57,14 @@ const nextConfig = {
   },
   
   // Configuração de webpack
-  webpack: (config, { isServer, dev }) => {
-    // Configuração robusta para resolver módulos no Vercel
+  webpack: (config, { isServer }) => {
+    // Adiciona suporte para arquivos .mjs
+    config.resolve.fallback = { fs: false, module: false };
+    
+    // Adiciona suporte para importação de módulos do diretório raiz
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@': path.resolve('./src'),
-      '@/lib': path.resolve('./src/lib'),
-      '@/components': path.resolve('./src/components'),
-      '@/app': path.resolve('./src/app'),
-      '@/hooks': path.resolve('./src/hooks'),
-    };
-    
-    // Configuração de extensões para resolver módulos
-    config.resolve.extensions = [
-      '.ts', '.tsx', '.js', '.jsx', '.json', '.mjs'
-    ];
-    
-    // Fallbacks para Node.js modules
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      fs: false,
-      net: false,
-      tls: false,
-      crypto: false,
-      path: false,
-      os: false,
-      stream: false,
-      util: false,
-      url: false,
-      assert: false,
-      buffer: false,
-      events: false,
-      module: false,
+      '@/': path.resolve(__dirname, './src'),
     };
     
     return config;

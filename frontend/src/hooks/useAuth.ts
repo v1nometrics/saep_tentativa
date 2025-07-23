@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useErrorHandler } from '@/hooks/useErrorHandler';
+import { useErrorHandler } from './useErrorHandler';
 import { createError } from '@/lib/errorMessages';
 import { CSRF_HEADER } from '@/lib/csrf';
 

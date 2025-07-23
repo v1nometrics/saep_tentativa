@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { apiService, Opportunity } from '@/lib/api';
-import { logout } from '@/lib/auth';
+import { apiService, type Opportunity } from '../lib/api';
+import { logout } from '../lib/auth'; // Importando a função de logout
 import { EmendaCardCompact } from '../components/EmendaCardCompact';
 import { EmendaTableView } from '../components/EmendaTableView';
 import { EmendaModalExpanded } from '../components/EmendaModalExpanded';
@@ -14,16 +14,6 @@ import { SummaryStatsInstitucional } from '../components/SummaryStatsInstitucion
 
 // Extend the Opportunity type to include relationship flag and financial fields
 interface OpportunityWithRel extends Opportunity {
-  orgao_orcamentario: string;
-  ano: number;
-  resultado_primario: string;
-  modalidade_de_aplicacao: string;
-  uf_favorecida: string;
-  partido: string;
-  acao: string;
-  autor: string;
-  valor_empenhado: number;
-  valor_pago: number;
   hasRelationship: boolean;
   dotacao_atual?: number;
   'Dotação Atual Emenda'?: number;

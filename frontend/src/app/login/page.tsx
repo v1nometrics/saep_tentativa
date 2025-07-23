@@ -2,26 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-// import { useAuth, LoginCredentials } from '@/hooks/useAuth';
+import { useAuth, LoginCredentials } from '@/hooks/useAuth';
 import { useCsrfToken, CSRF_HEADER } from '@/lib/csrf';
-
-// Define the type locally since the import is commented out
-interface LoginCredentials {
-  email: string;
-  password: string;
-  [key: string]: any;
-}
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  // Mock the useAuth hook's return values
-  const login = async (credentials: LoginCredentials) => {
-    console.log('Login disabled. Credentials:', credentials);
-    return Promise.resolve();
-  };
-  const isLoading = false;
-  const error: string | null = null;
+  const { login, isLoading, error } = useAuth();
   const router = useRouter();
   const csrfToken = useCsrfToken();
 
