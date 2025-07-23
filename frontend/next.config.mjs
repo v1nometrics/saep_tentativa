@@ -13,8 +13,10 @@ const nextConfig = {
   experimental: {
     // Habilita Server Actions
     serverActions: {},
-    serverComponentsExternalPackages: ['aws-sdk'],
   },
+  
+  // Pacotes externos para server components
+  serverExternalPackages: ['aws-sdk'],
   
   // Configuração de runtime para o middleware
   // (a configuração de runtime foi movida para o próprio middleware)
@@ -89,17 +91,6 @@ const nextConfig = {
       events: false,
       module: false,
     };
-    
-    // Força inclusão dos módulos lib no bundle
-    if (!isServer) {
-      config.entry = async () => {
-        const entries = await config.entry();
-        if (entries['main.js'] && !entries['main.js'].includes('./src/lib/modules.ts')) {
-          entries['main.js'].unshift('./src/lib/modules.ts');
-        }
-        return entries;
-      };
-    }
     
     return config;
   },
