@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { apiService, Opportunity } from '../lib/api';
-import { logout } from '../lib/auth';
+import { apiService, Opportunity } from '@/lib/api';
+import { logout } from '@/lib/auth';
 import { EmendaCardCompact } from '../components/EmendaCardCompact';
 import { EmendaTableView } from '../components/EmendaTableView';
 import { EmendaModalExpanded } from '../components/EmendaModalExpanded';
