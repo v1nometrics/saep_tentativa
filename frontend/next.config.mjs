@@ -59,13 +59,28 @@ const nextConfig = {
   // Configuração de webpack
   webpack: (config, { isServer }) => {
     // Adiciona suporte para arquivos .mjs
-    config.resolve.fallback = { fs: false, module: false };
+    config.resolve.fallback = { 
+      ...config.resolve.fallback,
+      fs: false, 
+      module: false,
+      path: false,
+      os: false
+    };
     
-    // Adiciona suporte para importação de módulos do diretório raiz
+    // Configuração robusta de aliases
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@/': path.resolve(__dirname, './src'),
+      '@': path.resolve(__dirname, './src'),
+      '@/lib': path.resolve(__dirname, './src/lib'),
+      '@/components': path.resolve(__dirname, './src/components'),
+      '@/hooks': path.resolve(__dirname, './src/hooks'),
+      '@/app': path.resolve(__dirname, './src/app'),
     };
+    
+    // Garantir extensões de arquivo
+    config.resolve.extensions = [
+      '.ts', '.tsx', '.js', '.jsx', '.json', '.mjs'
+    ];
     
     return config;
   },

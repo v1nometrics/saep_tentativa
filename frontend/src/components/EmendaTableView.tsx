@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { getMinistryInfo } from './icons/ministryIcons';
-import { Opportunity } from '../lib/api';
+import { Opportunity } from '@/lib/api';
 
 interface EmendaTableViewProps {
   emendas: (Opportunity & { hasRelationship: boolean })[];

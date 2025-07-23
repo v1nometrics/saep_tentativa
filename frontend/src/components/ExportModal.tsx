@@ -611,11 +611,10 @@ export function ExportModal({
       },
       didDrawPage: (data) => {
         // Adiciona numeração de página no rodapé
-        const pageCount = doc.internal.getNumberOfPages();
         doc.setFontSize(9);
         doc.setTextColor('#666');
         doc.text(
-          `Página ${data.pageNumber} de ${pageCount}`,
+          `Página ${data.pageNumber}`,
           pageWidth / 2,
           pageHeight - 15,
           { align: 'center' }

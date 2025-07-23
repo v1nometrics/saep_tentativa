@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { jsPDF } from 'jspdf';
-import { Opportunity } from '../lib/api';
+import { Opportunity } from '@/lib/api';
 
 interface EmendaModalExpandedProps {
   emenda: Opportunity & { hasRelationship: boolean };

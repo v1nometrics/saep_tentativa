@@ -1,22 +1,9 @@
 'use client';
 
 import React from 'react';
-import { Opportunity } from '../lib/api';
+import { Opportunity } from '@/lib/api';
 
-interface Em            <span className="inline-flex items-center px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-md font-medium">
-              <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                {/* Pessoa da frente (centralizada) */}
-                <circle cx="10" cy="5" r="2.5"/>
-                <path d="M10 9c-2.5 0-4.5 1.5-4.5 3.5v2.5h9v-2.5c0-2-2-3.5-4.5-3.5z"/>
-                {/* Pessoa da esquerda (atrás) */}
-                <circle cx="5" cy="4" r="2" opacity="0.6"/>
-                <path d="M5 7.5c-2 0-3.5 1.2-3.5 2.8v2.2h3.5v-1.5c0-1.2 0.8-2.2 2-2.8h-2z" opacity="0.6"/>
-                {/* Pessoa da direita (atrás) */}
-                <circle cx="15" cy="4" r="2" opacity="0.6"/>
-                <path d="M15 7.5c2 0 3.5 1.2 3.5 2.8v2.2h-3.5v-1.5c0-1.2-0.8-2.2-2-2.8h2z" opacity="0.6"/>
-              </svg>
-              Relacionamento
-            </span>rdProps {
+interface EmendaCardProps {
   emenda: Opportunity & { hasRelationship: boolean };
   onClick: (emenda: Opportunity & { hasRelationship: boolean }) => void;
 }

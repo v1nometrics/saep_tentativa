@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { getMinistryInfo } from './icons/ministryIcons';
-import { Opportunity } from '../lib/api';
+import { Opportunity } from '@/lib/api';
 
 interface EmendaCardProps {
   emenda: Opportunity & { hasRelationship: boolean };
