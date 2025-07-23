@@ -1,0 +1,149 @@
+{
+  "versao": "1.0.0",
+  "data_atualizacao": "2025-06-09",
+  "sistema": "SIOP Automação Completa",
+  
+  "navegacao": {
+    "url_siop": "https://www1.siop.planejamento.gov.br/QvAJAXZfc/opendoc.htm?document=IAS%2FExecucao_Orcamentaria.qvw&host=QVS%40pqlk04&anonymous=true&sheet=SH05",
+    "primeiro_botao": {
+      "seletores": [
+        "div.QvContent[style*='Document.19.Background']"
+      ],
+      "descricao": "Botão que deve ser clicado primeiro"
+    },
+    "segundo_botao": {
+      "texto": "Passo 2 - Visualize os Resultados",
+      "tag": "td",
+      "xpath": "//*[contains(text(), 'Passo 2 - Visualize os Resultados')]",
+      "descricao": "Botão com texto Passo 2"
+    }
+  },
+
+  "estados_css": {
+    "imagens_ativas": [
+      "Document.217.Background",
+      "Document.218.Background", 
+      "Document.216.Background",
+      "Document.214.Background",
+      "Document.215.Background"
+    ],
+    "imagens_inativas": [
+      "Document.205.Background",
+      "Document.208.Background",
+      "Document.203.Background", 
+      "Document.204.Background",
+      "Document.212.Background",
+      "Document.202.Background",
+      "Document.210.Background",
+      "Document.224.Background",
+      "Document.220.Background"
+    ]
+  },
+
+  "filtros": [
+    {
+      "nome": "Por Autor da Emenda",
+      "titulo_posicao": { "x": 320, "y": 300 },
+      "toggle_posicao": { "x": 270, "y": 295 },
+      "toggle_tamanho": { "height": 36, "width": 51 },
+      "background_image_name": "Document.218.Background",
+      "coluna": 1
+    },
+    {
+      "nome": "Por Tipo de Autor",
+      "titulo_posicao": { "x": 320, "y": 330 },
+      "toggle_posicao": { "x": 270, "y": 325 },
+      "toggle_tamanho": { "height": 36, "width": 51 },
+      "background_image_name": "Document.217.Background",
+      "coluna": 1
+    },
+    {
+      "nome": "Por Partido",
+      "titulo_posicao": { "x": 320, "y": 360 },
+      "toggle_posicao": { "x": 270, "y": 355 },
+      "toggle_tamanho": { "height": 36, "width": 51 },
+      "background_image_name": "Document.224.Background",
+      "coluna": 1
+    },
+    {
+      "nome": "Por UF do Autor",
+      "titulo_posicao": { "x": 580, "y": 300 },
+      "toggle_posicao": { "x": 530, "y": 295 },
+      "toggle_tamanho": { "height": 36, "width": 51 },
+      "background_image_name": "Document.202.Background",
+      "coluna": 2
+    },
+    {
+      "nome": "Por Número de Emenda",
+      "titulo_posicao": { "x": 580, "y": 330 },
+      "toggle_posicao": { "x": 530, "y": 325 },
+      "toggle_tamanho": { "height": 36, "width": 51 },
+      "background_image_name": "Document.215.Background",
+      "coluna": 2
+    },
+    {
+      "nome": "Por Órgão Orçamentário",
+      "titulo_posicao": { "x": 580, "y": 360 },
+      "toggle_posicao": { "x": 530, "y": 355 },
+      "toggle_tamanho": { "height": 36, "width": 51 },
+      "background_image_name": "Document.216.Background",
+      "coluna": 2
+    },
+    {
+      "nome": "Por Unidade Orçamentária",
+      "titulo_posicao": { "x": 852, "y": 300 },
+      "toggle_posicao": { "x": 802, "y": 295 },
+      "toggle_tamanho": { "height": 36, "width": 51 },
+      "background_image_name": "Document.204.Background",
+      "coluna": 3
+    },
+    {
+      "nome": "Por Ação",
+      "titulo_posicao": { "x": 852, "y": 330 },
+      "toggle_posicao": { "x": 802, "y": 325 },
+      "toggle_tamanho": { "height": 36, "width": 51 },
+      "background_image_name": "Document.214.Background",
+      "coluna": 3
+    },
+    {
+      "nome": "Por Localizador",
+      "titulo_posicao": { "x": 852, "y": 360 },
+      "toggle_posicao": { "x": 802, "y": 355 },
+      "toggle_tamanho": { "height": 36, "width": 51 },
+      "background_image_name": "Document.212.Background",
+      "coluna": 3
+    },
+    {
+      "nome": "Por GND",
+      "titulo_posicao": { "x": 1124, "y": 300 },
+      "toggle_posicao": { "x": 1074, "y": 295 },
+      "toggle_tamanho": { "height": 36, "width": 51 },
+      "background_image_name": "Document.205.Background",
+      "coluna": 4
+    },
+    {
+      "nome": "Por Modalidade",
+      "titulo_posicao": { "x": 1124, "y": 330 },
+      "toggle_posicao": { "x": 1074, "y": 325 },
+      "toggle_tamanho": { "height": 36, "width": 51 },
+      "background_image_name": "Document.208.Background",
+      "coluna": 4
+    },
+    {
+      "nome": "Por Natureza de Despesa",
+      "titulo_posicao": { "x": 1124, "y": 360 },
+      "toggle_posicao": { "x": 1074, "y": 355 },
+      "toggle_tamanho": { "height": 36, "width": 51 },
+      "background_image_name": "Document.210.Background",
+      "coluna": 4
+    }
+  ],
+
+  "configuracoes": {
+    "total_filtros": 12,
+    "timeout_padrao": 60,
+    "timeout_download": 200,
+    "precisao_deteccao": "100%",
+    "pasta_download": "../downloads/siop/"
+  }
+} 

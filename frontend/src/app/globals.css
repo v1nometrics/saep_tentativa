@@ -1,0 +1,324 @@
+@import "tailwindcss";
+
+:root {
+  /* Paleta Institucional Moderna */
+  --background: #fafafa;
+  --foreground: #1a1a1a;
+  --primary: #1e3a5f;
+  --secondary: #475569;
+  --accent: #064e3b;
+  --card: #ffffff;
+  --border: #e2e8f0;
+  --muted: #f8fafc;
+  --muted-foreground: #64748b;
+  
+  /* Dark mode alternatives */
+  --dark-background: #0a0a0a;
+  --dark-foreground: #fafafa;
+  --dark-card: #181818;
+  --dark-border: #2a2a2a;
+
+  /* Base z-indexes */
+  --z-base: 1;
+  --z-dropdown-container: 10;
+  --z-dropdown-menu: 1000;
+  --z-dropdown-active: 1000;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: linear-gradient(135deg, #fafafa 0%, #f1f5f9 50%, #e2e8f0 100%);
+  color: var(--foreground);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Animações modernas e sutis */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes subtle-glow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(30, 58, 95, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(30, 58, 95, 0.15);
+  }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes pulse-bg {
+  0%, 100% {
+    background-color: rgba(134, 239, 172, 0.35); /* green-300 with opacity */
+  }
+  50% {
+    background-color: rgba(187, 247, 208, 0.15); /* green-200 with lower opacity */
+  }
+}
+
+/* Classes de animação */
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.5s ease-out;
+}
+
+.animate-subtle-glow {
+  animation: subtle-glow 3s ease-in-out infinite;
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 4s ease infinite;
+}
+
+.animate-pulse-bg {
+  animation: pulse-bg 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Efeitos glass morphism institucionais */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+.glass-dark {
+  background: rgba(24, 24, 24, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(42, 42, 42, 0.5);
+}
+
+/* Hover effects modernos e sutis */
+.modern-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modern-hover:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Institutional button styles */
+.btn-institutional {
+  background: linear-gradient(135deg, #1e3a5f 0%, #475569 100%);
+  color: white;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.btn-institutional:hover {
+  background: linear-gradient(135deg, #1e3a5f 0%, #334155 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(30, 58, 95, 0.3);
+}
+
+/* Scrollbar customizada institucional */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #64748b;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* ===== SISTEMA DE DROPDOWNS INSTITUCIONAL ===== */
+/* Cada container de dropdown deve ser relativo */
+.dropdown-container {
+  position: relative !important;
+  z-index: var(--z-dropdown-container);
+}
+
+/* Garante que cada nível subsequente de dropdown tenha um z-index maior */
+.dropdown-container:nth-child(1) { z-index: calc(var(--z-dropdown-container) + 40); }
+.dropdown-container:nth-child(2) { z-index: calc(var(--z-dropdown-container) + 30); }
+.dropdown-container:nth-child(3) { z-index: calc(var(--z-dropdown-container) + 20); }
+.dropdown-container:nth-child(4) { z-index: calc(var(--z-dropdown-container) + 10); }
+
+/* Dropdowns SEMPRE aparecem na posição correta com z-index controlado */
+.dropdown-menu {
+  position: absolute !important;
+  top: 100% !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: var(--z-dropdown-menu) !important;
+  margin-top: 2px !important;
+  /* Garantir que dropdowns longos não sejam cortados */
+  max-height: 280px !important;
+  overflow-y: auto !important;
+  /* Sombra sutil e elegante */
+  box-shadow: 0 4px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+  /* Garantir backdrop blur */
+  backdrop-filter: blur(20px) !important;
+  /* Estilo institucional */
+  background: rgba(255, 255, 255, 0.98) !important;
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+  border-radius: 8px !important;
+  /* Correção de scroll */
+  scrollbar-width: thin;
+  scrollbar-color: var(--secondary) var(--muted);
+}
+
+/* Quando um dropdown está aberto, seu container tem prioridade máxima */
+.dropdown-container[data-dropdown-active="true"] {
+  z-index: 9999 !important;
+  position: relative !important;
+}
+
+/* Garantir que o grid de cards não interfira com dropdowns */
+.grid {
+  z-index: 1;
+  position: relative;
+}
+
+/* Container de filtros tem prioridade sobre cards */
+.filter-sidebar {
+  z-index: calc(var(--z-base) + 100);
+  position: relative;
+}
+
+/* Área principal com cards deve ter z-index menor */
+.main-content {
+  z-index: var(--z-base);
+  position: relative;
+}
+
+/* Estilos para logo institucional */
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-innovatis {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Utilitários para line-clamp (truncar texto) */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Estilos para tabela responsiva */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Barra de rolagem horizontal mais visível */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 12px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 6px;
+  border: 2px solid #f8fafc;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+.overflow-x-auto::-webkit-scrollbar-corner {
+  background: #f8fafc;
+}
+
+/* Checkbox verde customizado */
+.checkbox-green {
+  appearance: none;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid #d1d5db;
+  border-radius: 0.25rem;
+  background-color: white;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.checkbox-green:checked {
+  background-color: #16a34a !important;
+  border-color: #16a34a !important;
+}
+
+.checkbox-green:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.checkbox-green:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.5);
+}
+
+.checkbox-green:hover {
+  border-color: #16a34a;
+}

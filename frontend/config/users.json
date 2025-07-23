@@ -1,0 +1,5 @@
+{
+  "admin@gov.br": { "password": "admin123", "role": "admin" },
+  "user@gov.br": { "password": "user123", "role": "user" },
+  "vinicius.torres@innovatismc.com": { "password": "1919", "role": "admin" }
+}

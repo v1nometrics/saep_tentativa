@@ -1,0 +1,14 @@
+# Dependências principais para automação SIOP
+selenium==4.15.2
+webdriver-manager==4.0.1
+
+# Dependências para AWS S3
+boto3==1.34.0
+botocore==1.34.0
+
+# Dependências para processamento de dados
+pandas==2.0.3
+python-dotenv==1.0.0
+
+# Dependências opcionais (descomente se necessário)
+# streamlit==1.28.0  # apenas para interface web opcional 
