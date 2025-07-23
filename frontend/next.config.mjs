@@ -13,6 +13,7 @@ const nextConfig = {
   experimental: {
     // Habilita Server Actions
     serverActions: {},
+    serverComponentsExternalPackages: ['aws-sdk'],
   },
   
   // Configuração de runtime para o middleware
@@ -55,15 +56,50 @@ const nextConfig = {
   },
   
   // Configuração de webpack
-  webpack: (config, { isServer }) => {
-    // Adiciona suporte para arquivos .mjs
-    config.resolve.fallback = { fs: false, module: false };
-    
-    // Configuração explícita de alias para resolver @/* paths
+  webpack: (config, { isServer, dev }) => {
+    // Configuração robusta para resolver módulos no Vercel
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': path.resolve('./src'),
+      '@/lib': path.resolve('./src/lib'),
+      '@/components': path.resolve('./src/components'),
+      '@/app': path.resolve('./src/app'),
+      '@/hooks': path.resolve('./src/hooks'),
     };
+    
+    // Configuração de extensões para resolver módulos
+    config.resolve.extensions = [
+      '.ts', '.tsx', '.js', '.jsx', '.json', '.mjs'
+    ];
+    
+    // Fallbacks para Node.js modules
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      net: false,
+      tls: false,
+      crypto: false,
+      path: false,
+      os: false,
+      stream: false,
+      util: false,
+      url: false,
+      assert: false,
+      buffer: false,
+      events: false,
+      module: false,
+    };
+    
+    // Força inclusão dos módulos lib no bundle
+    if (!isServer) {
+      config.entry = async () => {
+        const entries = await config.entry();
+        if (entries['main.js'] && !entries['main.js'].includes('./src/lib/modules.ts')) {
+          entries['main.js'].unshift('./src/lib/modules.ts');
+        }
+        return entries;
+      };
+    }
     
     return config;
   },

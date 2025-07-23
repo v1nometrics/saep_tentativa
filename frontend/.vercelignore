@@ -1,0 +1,5 @@
+# Vercel ignore file
+# Ensure all lib files are included in build
+!src/lib/**/*
+!src/lib/*.ts
+!src/lib/*.js

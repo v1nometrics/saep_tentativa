@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import "./globals"; // Force load all lib modules for Vercel build
 import { ToastProvider } from "@/components/ui/Toast";
 import { MainLayout } from "@/components/layout/MainLayout";
 
