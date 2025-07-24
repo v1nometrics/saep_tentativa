@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth, LoginCredentials } from '../../hooks/useAuth';
 import { useCsrfToken, CSRF_HEADER } from '../../lib/csrf';
@@ -81,6 +81,7 @@ export default function LoginPage() {
   };
 
   return (
+    <Suspense fallback={null}>
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="w-full max-w-4xl flex flex-col md:flex-row bg-white shadow-2xl rounded-xl overflow-hidden">
 
@@ -182,5 +183,6 @@ export default function LoginPage() {
 
       </div>
     </div>
+    </Suspense>
   );
 }
