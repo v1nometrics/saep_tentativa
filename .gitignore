@@ -10,7 +10,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# lib/ removido para permitir rastrear frontend/src/lib
+# lib/
 lib64/
 parts/
 sdist/

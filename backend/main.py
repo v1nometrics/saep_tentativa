@@ -47,7 +47,7 @@ app = FastAPI(
 # Configurar CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Em produção, especificar domínios
+    allow_origins=os.getenv("ALLOWED_ORIGINS", "https://saep-frontend-final.vercel.app,https://*.vercel.app,http://localhost:3000").split(","),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
