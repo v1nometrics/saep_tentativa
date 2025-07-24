@@ -3,41 +3,13 @@
   "builds": [
     {
       "src": "package.json",
-      "use": "@vercel/next",
-      "config": {}
+      "use": "@vercel/next"
     }
   ],
   "routes": [
     { "handle": "filesystem" },
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/(.*)", "dest": "/$1" }
-  ],
-  "build": {
-    "env": {
-      "NODE_OPTIONS": "--max-old-space-size=4096"
-    }
-  },
-      "destination": "https://p01--emendas-backend--c7pb86lv22r8.code.run/api/:path*"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "X-XSS-Protection",
-          "value": "1; mode=block"
-        }
-      ]
-    }
   ],
   "env": {
     "NEXT_PUBLIC_APP_NAME": "SEP",
