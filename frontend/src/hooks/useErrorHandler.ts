@@ -1,8 +1,8 @@
 'use client';
 
 import { useCallback } from 'react';
-import { useToast } from '@/components/ui/Toast';
-import { getFriendlyErrorMessage, isAuthError, isNetworkError } from '@/lib/errorMessages';
+import { useToast } from '../components/ui/Toast';
+import { getFriendlyErrorMessage, isAuthError, isNetworkError } from '../lib/errorMessages';
 
 export function useErrorHandler() {
   const { showToast } = useToast();
@@ -21,10 +21,10 @@ export function useErrorHandler() {
     const friendlyMessage = getFriendlyErrorMessage(error, context.defaultMessage);
     
     // Determina o tipo de toast com base no tipo de erro
-    let toastType: 'error' | 'warning' | 'info' = 'error';
+    let toastType: 'error' | 'info' = 'error';
     
     if (isNetworkError(error)) {
-      toastType = 'warning';
+      toastType = 'info';
     } else if (isAuthError(error)) {
       toastType = 'error';
     }

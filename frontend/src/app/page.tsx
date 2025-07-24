@@ -2,15 +2,15 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { apiService, type Opportunity } from '@/lib/api';
-import { logout } from '@/lib/auth'; // Importando a função de logout
-import { EmendaCardCompact } from '@/components/EmendaCardCompact';
-import { EmendaTableView } from '@/components/EmendaTableView';
-import { EmendaModalExpanded } from '@/components/EmendaModalExpanded';
-import { ExportModal } from '@/components/ExportModal';
-import SearchBarInstitutional from '@/components/SearchBarInstitutional';
-import { FilterPanelInstitutional } from '@/components/FilterPanelInstitutional';
-import { SummaryStatsInstitucional } from '@/components/SummaryStatsInstitucional';
+import { apiService, type Opportunity } from '../lib/api';
+import { logout } from '../lib/auth'; // Importando a função de logout
+import { EmendaCardCompact } from '../components/EmendaCardCompact';
+import { EmendaTableView } from '../components/EmendaTableView';
+import { EmendaModalExpanded } from '../components/EmendaModalExpanded';
+import { ExportModal } from '../components/ExportModal';
+import SearchBarInstitutional from '../components/SearchBarInstitutional';
+import { FilterPanelInstitutional } from '../components/FilterPanelInstitutional';
+import { SummaryStatsInstitucional } from '../components/SummaryStatsInstitucional';
 
 // Extend the Opportunity type to include relationship flag and financial fields
 interface OpportunityWithRel extends Opportunity {
