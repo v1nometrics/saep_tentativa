@@ -15,6 +15,7 @@ INÍCIO SIMPLES - EXPANSÍVEL
 
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 import os
 import logging
@@ -25,6 +26,7 @@ from dotenv import load_dotenv
 import re
 import unicodedata
 import hashlib
+import json
 from functools import lru_cache
 
 from services.s3_service import S3Service
@@ -53,6 +55,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+# Comprimir respostas grandes para reduzir banda e CPU de serialização
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # Inicializar serviços
 s3_service = S3Service()
@@ -61,6 +65,10 @@ etl_service = ETLService()
 # Variável global para cache simples (em produção, usar Redis)
 cached_opportunities = None
 last_update = None
+
+# Cache pré-computado de todos os registros já normalizados (lista de dicts)
+_cached_full_json_records = None
+_cached_full_json_hash = None
 
 # Helper para UTC timezone-aware datetime (corrige DeprecationWarning)
 def utc_now():
@@ -555,7 +563,7 @@ async def search_opportunities(
     Returns:
         Dict com oportunidades + informações sobre filtros aplicados + estatísticas (se solicitado)
     """
-    global cached_opportunities, last_update
+    global cached_opportunities, last_update, _cached_full_json_records, _cached_full_json_hash
     
     # Converter include_stats para boolean
     include_stats_bool = include_stats is not None and include_stats.lower() in ['true', '1', 'yes']
@@ -1087,7 +1095,7 @@ async def get_opportunities(
         offset: Offset para paginação
         ministry: Filtrar por ministério específico
     """
-    global cached_opportunities, last_update
+    global cached_opportunities, last_update, _cached_full_json_records, _cached_full_json_hash
     
     try:
         # Se não tem cache ou está desatualizado, processar dados
@@ -1114,12 +1122,32 @@ async def get_opportunities(
                     filtered_data[orgao_col].str.contains(ministry, case=False, na=False)
                 ]
         
-        # Paginação
+        # Total após filtros
         total = len(filtered_data)
-        paged_data = filtered_data.iloc[offset:offset+limit]
+
+        # Construir/atualizar cache JSON completo se necessário (somente quando não há filtro específico)
+        if ministry is None:
+            df_hash = _generate_dataframe_hash(cached_opportunities)
+            if _cached_full_json_records is None or _cached_full_json_hash != df_hash:
+                logger.info("🔄 Construindo cache JSON completo (records já normalizados)...")
+                _cached_full_json_records = convert_dataframe_to_json(cached_opportunities)
+                _cached_full_json_hash = df_hash
+
+        # Selecionar oportunidades
+        if ministry is None and offset == 0 and limit >= total:
+            # Entrega lista já pronta do cache completo
+            opportunities = _cached_full_json_records
+        else:
+            # Slice no DataFrame filtrado e conversão pontual
+            paged_df = filtered_data.iloc[offset:offset+limit]
+            opportunities = convert_dataframe_to_json(paged_df)
+        
+        # Paginação
+        # total = len(filtered_data)
+        # paged_data = filtered_data.iloc[offset:offset+limit]
         
         # Converter para formato JSON com tratamento de valores monetários
-        opportunities = convert_dataframe_to_json(paged_data)
+        # opportunities = convert_dataframe_to_json(paged_data)
         
         return {
             "opportunities": opportunities,
@@ -1312,7 +1340,7 @@ async def clear_s3_cache():
         s3_service.clear_cache()
         
         # Também limpar cache de oportunidades
-        global cached_opportunities, last_update
+        global cached_opportunities, last_update, _cached_full_json_records, _cached_full_json_hash
         cached_opportunities = None
         last_update = None
         
@@ -1452,7 +1480,7 @@ async def _process_siop_data(force_download: bool = False, source: str = "autom�
     Returns:
         bool: True se processamento foi bem-sucedido
     """
-    global cached_opportunities, last_update
+    global cached_opportunities, last_update, _cached_full_json_records, _cached_full_json_hash
     
     try:
         logger.info(f"🔄 Iniciando processamento {source} de dados (force_download={force_download})...")
