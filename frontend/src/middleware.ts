@@ -16,6 +16,9 @@ const publicRoutes = [
   '/_next',
   '/favicon.ico',
   '/static',
+  '/manifest.json',
+  '/icon',
+  '/icons',
 ];
 
 // Rotas que não requerem verificação CSRF
@@ -25,6 +28,9 @@ const csrfExcludedRoutes = [
   '/_next',
   '/favicon.ico',
   '/static',
+  '/manifest.json',
+  '/icon',
+  '/icons',
 ];
 
 // Verifica se a rota é pública
