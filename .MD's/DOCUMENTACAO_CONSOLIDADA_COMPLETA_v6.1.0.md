@@ -16,6 +16,32 @@
 
 ## 🚀 HISTÓRICO DE VERSÕES E IMPLEMENTAÇÕES
 
+### 🛠 v6.1.1 - CORREÇÕES DE CONSISTÊNCIA E VALORES MONETÁRIOS (24/07/2025)
+
+#### 🎯 **OBJETIVO PRINCIPAL**
+Garantir consistência absoluta entre filtros, exportação e estatísticas, além de corrigir o parsing de valores monetários em todo o sistema.
+
+#### 🔧 **CORREÇÕES IMPLEMENTADAS**
+
+1. **Backend FastAPI**
+   - Criado método central `_clean_monetary_value` em `ETLService`.
+   - Filtro financeiro (`_filter_financeiro`) e `generate_summary` reutilizam a mesma lógica.
+   - Corrigida conversão de "1.234,56" ➜ `1234.56`, eliminando inflação nos totais (~80 bi).
+
+2. **Frontend Next.js**
+   - `parseMonetaryValue` em `src/lib/api.ts` agora remove pontos de milhar e troca vírgula decimal por ponto.
+   - `Dashboard (page.tsx)`: adicionado `originalSearchResults` na dependência do `useEffect` principal, garantindo que grid, tabela e exportação recebam sempre o dataset filtrado atual.
+
+3. **Build / Deploy**
+   - Resolvido problema de aliases `@/lib/*` em Vercel (ajuste case-sensitive e paths).
+
+#### ✅ **RESULTADOS**
+- Totais de **Dotação Inicial** e **Dotação Atual** corretos (~80 bi) em resumo, grid, tabela e export.
+- Exportações CSV/Excel refletem exatamente o mesmo filtro aplicado na UI.
+- Eliminação de divergências entre estatísticas e dados exibidos.
+
+---
+
 ### ✨ v6.1.0 - SISTEMA DE ORDENAÇÃO GLOBAL (22/07/2025)
 
 #### 🎯 **OBJETIVO PRINCIPAL**
