@@ -156,6 +156,6 @@ export const config = {
      * - static (arquivos estáticos)
      */
     '/',
-    '/((?!_next/static|_next/image|favicon.ico|api|login|static).*)',
+    '/((?!_next/static|_next/image|favicon.ico|manifest.json|icon|icons|api|login|static).*)',
   ],
 };
