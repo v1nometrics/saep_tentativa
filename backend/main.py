@@ -216,9 +216,25 @@ def create_unique_codigo_and_deduplicate(df: pd.DataFrame) -> pd.DataFrame:
                 df['_tmp_dotacao'] = 0
                 dotacao_col = '_tmp_dotacao'
 
+                        # Conversão robusta de valores monetários (formato brasileiro)
+            def _brl_to_float(series: pd.Series) -> pd.Series:
+                return (
+                    pd.to_numeric(
+                        series.astype(str)
+                              # remover espaços e símbolo de moeda
+                              .str.replace(r'[^0-9,.-]', '', regex=True)
+                              # remover separador de milhar '.'
+                              .str.replace('.', '', regex=False)
+                              # trocar vírgula decimal por ponto
+                              .str.replace(',', '.', regex=False),
+                        errors='coerce'
+                    )
+                    .fillna(0)
+                )
+
             # Garantir que sejam numéricos para correta ordenação
-            df[empenhado_col] = pd.to_numeric(df[empenhado_col], errors='coerce').fillna(0)
-            df[dotacao_col]  = pd.to_numeric(df[dotacao_col],  errors='coerce').fillna(0)
+            df[empenhado_col] = _brl_to_float(df[empenhado_col])
+            df[dotacao_col]  = _brl_to_float(df[dotacao_col])
 
             df_antes = len(df)
 

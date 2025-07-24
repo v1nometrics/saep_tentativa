@@ -317,7 +317,7 @@ export default function Dashboard() {
       
       return () => clearTimeout(timeoutId);
     }
-  }, [selectedMinistries, selectedYears, selectedRP, selectedModalidades, selectedUFs, selectedPartidos, showOnlyRelatedMinistries, minDotacaoAtual, isInitialized, summary, currentPage]);
+  }, [selectedMinistries, selectedYears, selectedRP, selectedModalidades, selectedUFs, selectedPartidos, showOnlyRelatedMinistries, minDotacaoAtual, isInitialized, summary, currentPage, originalSearchResults]);
 
   // useEffect para controlar ministérios baseado no filtro de relacionamento
   useEffect(() => {
