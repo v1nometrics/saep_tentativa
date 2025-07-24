@@ -3,7 +3,7 @@
 ## 📋 Visão Geral
 - **Projeto**: Sistema de Análise de Emendas Parlamentares (v6.1.0)
 - **Stack**: Next.js 15.3.3, React 19, TypeScript, Tailwind CSS
-- **Backend**: Implantado em `https://emendas-backend-api.vercel.app`
+- **Backend**: Implantado em `https://saep-backend-ffetggeuetaudzfv.brazilsouth-01.azurewebsites.net`
 
 ## 🔍 Problemas Encontrados
 
@@ -49,7 +49,7 @@ const nextConfig = {
 - Ajustado `tsconfig.json` com paths corretos
 
 ### 4. Backend
-- URL: `https://emendas-backend-api.vercel.app`
+- URL: `https://saep-backend-ffetggeuetaudzfv.brazilsouth-01.azurewebsites.net`
 - CORS configurado para aceitar requisições do domínio do frontend
 
 ## 🚀 Próximos Passos
