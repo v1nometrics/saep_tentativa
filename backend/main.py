@@ -202,106 +202,54 @@ def create_unique_codigo_and_deduplicate(df: pd.DataFrame) -> pd.DataFrame:
         # DEDUPLICAÇÃO: Remover duplicatas baseado no código único
         if duplicatas > 0:
             logger.info(f"🔄 Iniciando deduplicação de {duplicatas} registros duplicados...")
-            
-            # Estratégia: Manter o registro com maior valor empenhado para cada código único
-            # Se empenhado = 0, manter o com maior dotação atual
-            # Se ambos = 0, manter o primeiro encontrado
-            
-            def select_best_transaction(group):
-                """Seleciona a melhor transação de um grupo de emendas iguais"""
-                if len(group) == 1:
-                    return group.iloc[0]
-                
-                # Obter código da emenda de forma segura
-                try:
-                    codigo_emenda = group.name if hasattr(group, 'name') else group.index[0] if hasattr(group, 'index') else "DESCONHECIDO"
-                    if 'Codigo_Emenda' in group.columns:
-                        codigo_emenda = group['Codigo_Emenda'].iloc[0]
-                except:
-                    codigo_emenda = "ERRO_CODIGO"
-                
-                # Prioridade 1: Maior valor empenhado
-                empenhado_col = None
-                for col in ['Empenhado', 'empenhado']:
-                    if col in group.columns:
-                        empenhado_col = col
-                        break
-                
-                if empenhado_col:
-                    # Converter para numérico se necessário
-                    empenhado_values = pd.to_numeric(group[empenhado_col], errors='coerce').fillna(0)
-                    max_empenhado = empenhado_values.max()
-                    
-                    if max_empenhado > 0:
-                        # Retornar registro com maior empenhado
-                        idx_max_empenhado = empenhado_values.idxmax()
-                        logger.debug(f"   Código {codigo_emenda}: Mantendo registro com empenhado R$ {max_empenhado:,.2f}")
-                        return group.loc[idx_max_empenhado]
-                
-                # Prioridade 2: Maior dotação atual
-                dotacao_col = None
-                for col in ['Dotação Atual Emenda', 'dotacao_atual']:
-                    if col in group.columns:
-                        dotacao_col = col
-                        break
-                
-                if dotacao_col:
-                    dotacao_values = pd.to_numeric(group[dotacao_col], errors='coerce').fillna(0)
-                    max_dotacao = dotacao_values.max()
-                    
-                    if max_dotacao > 0:
-                        idx_max_dotacao = dotacao_values.idxmax()
-                        logger.debug(f"   Código {codigo_emenda}: Mantendo registro com dotação R$ {max_dotacao:,.2f}")
-                        return group.loc[idx_max_dotacao]
-                
-                # Prioridade 3: Primeiro registro encontrado
-                logger.debug(f"   Código {codigo_emenda}: Mantendo primeiro registro (valores zerados)")
-                return group.iloc[0]
-            
-            # Aplicar deduplicação (usando include_groups=False para evitar DeprecationWarning)
+
+            # --- Estrutura auxiliar de priorização -------------------------
+            empenhado_col = next((c for c in ['Empenhado', 'empenhado'] if c in df.columns), None)
+            dotacao_col   = next((c for c in ['Dotação Atual Emenda', 'dotacao_atual'] if c in df.columns), None)
+
+            # As colunas de priorização podem estar ausentes dependendo do estágio do ETL;
+            # se não existirem, preenchemos com zeros para manter a lógica consistente.
+            if empenhado_col is None:
+                df['_tmp_empenhado'] = 0
+                empenhado_col = '_tmp_empenhado'
+            if dotacao_col is None:
+                df['_tmp_dotacao'] = 0
+                dotacao_col = '_tmp_dotacao'
+
+            # Garantir que sejam numéricos para correta ordenação
+            df[empenhado_col] = pd.to_numeric(df[empenhado_col], errors='coerce').fillna(0)
+            df[dotacao_col]  = pd.to_numeric(df[dotacao_col],  errors='coerce').fillna(0)
+
             df_antes = len(df)
-            
-            # IMPORTANTE: Preservar a coluna Codigo_Emenda após groupby
-            # O groupby remove a coluna usada como chave por padrão
-            df_deduplicated = df.groupby('Codigo_Emenda', group_keys=False).apply(select_best_transaction, include_groups=False).reset_index(drop=True)
-            
-            # Garantir que a coluna Codigo_Emenda esteja presente no resultado final
-            if 'Codigo_Emenda' not in df_deduplicated.columns:
-                # Recriar códigos únicos para o DataFrame deduplicado
-                logger.warning("⚠️ Coluna Codigo_Emenda removida pelo groupby, recriando...")
-                def recreate_codigo_emenda(row):
-                    try:
-                        ano = str(int(row['Ano']))
-                        nro_emenda = str(row['Nro. Emenda']).zfill(8)
-                        codigo_autor = nro_emenda[:4]
-                        num_sequencial = nro_emenda[4:]
-                        return f"{ano}-{codigo_autor}-{num_sequencial}"
-                    except Exception as e:
-                        logger.warning(f"Erro ao recriar código: {e}")
-                        return f"ERRO-{row.get('Ano', 'XXXX')}-{str(row.get('Nro. Emenda', 'XXXXXXXX')).zfill(8)}"
-                
-                df_deduplicated['Codigo_Emenda'] = df_deduplicated.apply(recreate_codigo_emenda, axis=1)
-                logger.info("✅ Coluna Codigo_Emenda recriada após deduplicação")
-            
-            df = df_deduplicated
-            df_depois = len(df)
-            
+
+            # Ordena pelos critérios de prioridade e mantém o 1º de cada código
+            df_sorted = (
+                df
+                .sort_values(by=[empenhado_col, dotacao_col], ascending=[False, False])
+                .drop_duplicates(subset=['Codigo_Emenda'], keep='first')
+                .reset_index(drop=True)
+            )
+
+            # Limpar colunas temporárias, se criadas
+            df_sorted.drop(columns=[c for c in ['_tmp_empenhado', '_tmp_dotacao'] if c in df_sorted.columns], inplace=True)
+
+            df_depois = len(df_sorted)
             removidos = df_antes - df_depois
-            logger.info(f"✅ Deduplicação concluída:")
+
+            logger.info("✅ Deduplicação concluída:")
             logger.info(f"   📊 Registros antes: {df_antes:,}")
             logger.info(f"   📊 Registros depois: {df_depois:,}")
             logger.info(f"   🗑️ Registros removidos: {removidos:,}")
             logger.info(f"   🎯 Taxa de deduplicação: {(removidos/df_antes)*100:.1f}%")
-            
-            # Verificação final (apenas se a coluna Codigo_Emenda existe)
-            if 'Codigo_Emenda' in df.columns:
-                codigos_finais = df['Codigo_Emenda'].nunique()
-                if codigos_finais == df_depois:
-                    logger.info("✅ SUCESSO: Cada código de emenda agora tem apenas 1 registro!")
-                else:
-                    logger.warning(f"⚠️ ATENÇÃO: Ainda há {df_depois - codigos_finais} duplicatas restantes")
+
+            # Verificação final
+            codigos_finais = df_sorted['Codigo_Emenda'].nunique(dropna=False)
+            if codigos_finais == df_depois:
+                logger.info("✅ SUCESSO: Cada código de emenda agora tem apenas 1 registro!")
             else:
-                logger.warning("⚠️ Verificação final pulada: coluna 'Codigo_Emenda' não encontrada")
+                logger.warning(f"⚠️ Ainda há {df_depois - codigos_finais} duplicatas restantes")
+
+            df = df_sorted
         
         return df
     else:
