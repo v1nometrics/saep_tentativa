@@ -1,7 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+
+// Helper para evitar erro de SSR com useSearchParams
+const useSearchParamsSsrSafe = () => {
+  if (typeof window === 'undefined') {
+    return { get: () => null }; // Mock para SSR
+  }
+  return require('next/navigation').useSearchParams();
+};
 import { useErrorHandler } from './useErrorHandler';
 import { createError } from '../lib/errorMessages';
 import { CSRF_HEADER } from '../lib/csrf';
@@ -14,7 +22,7 @@ export interface LoginCredentials {
 
 export function useAuth() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParamsSsrSafe();
   const { handleError, withErrorHandling } = useErrorHandler();
   
   const [isLoading, setIsLoading] = useState(false);
