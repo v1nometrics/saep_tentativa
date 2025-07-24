@@ -363,7 +363,7 @@ class ApiService {
   }
 
   async getSummary(): Promise<SummaryResponse> {
-    const response = await fetch(`${API_BASE_URL}/api/summary`);
+    const response = await fetch(`${API_BASE_URL}/summary`);
 
     if (!response.ok) {
       throw new Error(`Erro na API: ${response.status} ${response.statusText}`);
