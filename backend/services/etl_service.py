@@ -84,27 +84,10 @@ class ETLService:
         self.logger.info(f"💰 Aplicando filtro financeiro nas colunas: '{dotacao_col}' e '{empenhado_col}'")
         original_count = len(df)
         
-        # Converter valores para numérico, tratando possíveis strings
-        def clean_monetary_value(val):
-            if pd.isna(val) or val is None or val == '':
-                return 0.0
-            if isinstance(val, (int, float)):
-                return float(val)
-            if isinstance(val, str):
-                try:
-                    # Remover pontos de milhares e espaços
-                    clean_val = str(val).strip().replace('.', '').replace(',', '').replace(' ', '')
-                    if not clean_val or clean_val == 'N/A' or clean_val.lower() == 'nan':
-                        return 0.0
-                    return float(clean_val)
-                except (ValueError, TypeError):
-                    return 0.0
-            return 0.0
-        
         # Aplicar limpeza nos valores
         df_clean = df.copy()
-        df_clean[dotacao_col + '_numeric'] = df_clean[dotacao_col].apply(clean_monetary_value)
-        df_clean[empenhado_col + '_numeric'] = df_clean[empenhado_col].apply(clean_monetary_value)
+        df_clean[dotacao_col + '_numeric'] = df_clean[dotacao_col].apply(self._clean_monetary_value)
+        df_clean[empenhado_col + '_numeric'] = df_clean[empenhado_col].apply(self._clean_monetary_value)
         
         # Aplicar filtros financeiros
         # Condição 1: Dotação Atual >= 10.000 (valor mínimo para viabilidade)
@@ -262,36 +245,8 @@ class ETLService:
         df_clean = df.copy()
         if dotacao_col and dotacao_col in df.columns:
             try:
-                # Converter valores para numérico primeiro, tratando strings numéricas
-                def clean_monetary_value(val):
-                    if pd.isna(val) or val is None or val == '':
-                        return 0.0
-                    
-                    # Se já é número, manter
-                    if isinstance(val, (int, float)):
-                        return float(val)
-                    
-                    # Se é string, limpar e converter
-                    if isinstance(val, str):
-                        try:
-                            # Remover pontos de milhares e espaços
-                            clean_val = str(val).strip()
-                            clean_val = clean_val.replace('.', '').replace(',', '').replace(' ', '')
-                            
-                            # Se ficou vazio, retornar 0
-                            if not clean_val or clean_val == 'N/A' or clean_val.lower() == 'nan':
-                                return 0.0
-                            
-                            # Converter para float
-                            return float(clean_val)
-                        except (ValueError, TypeError):
-                            self.logger.warning(f"⚠️ Não foi possível converter valor '{val}' na coluna de dotação")
-                            return 0.0
-                    
-                    return 0.0
-                
                 # Aplicar conversão na coluna de dotação
-                df_clean[dotacao_col + '_numeric'] = df_clean[dotacao_col].apply(clean_monetary_value)
+                df_clean[dotacao_col + '_numeric'] = df_clean[dotacao_col].apply(self._clean_monetary_value)
                 
                 # NOVO CÁLCULO: Valor Disponível = Soma da Dotação Atual
                 # (Empenhado já é 0 devido ao filtro financeiro)
@@ -435,4 +390,28 @@ class ETLService:
             "autor": self._find_column(df, ['Autor', 'autor_emenda', 'autor', 'parlamentar'])
         }
         
-        return {k: v for k, v in suggestions.items() if v} 
+        return {k: v for k, v in suggestions.items() if v}
+
+    def _clean_monetary_value(self, val) -> float:
+        """Limpa e converte um valor monetário (string ou numérico) para float."""
+        if pd.isna(val) or val is None or val == '':
+            return 0.0
+        
+        if isinstance(val, (int, float)):
+            return float(val)
+        
+        if isinstance(val, str):
+            try:
+                clean_val = str(val).strip()
+                # Lógica para formato brasileiro: "1.234,56" -> "1234.56"
+                clean_val = clean_val.replace('.', '').replace(',', '.')
+                
+                if not clean_val or clean_val.lower() in ['na', 'n/a', 'nan']:
+                    return 0.0
+                
+                return float(clean_val)
+            except (ValueError, TypeError):
+                self.logger.warning(f"⚠️ Não foi possível converter o valor monetário '{val}' para número.")
+                return 0.0
+        
+        return 0.0
