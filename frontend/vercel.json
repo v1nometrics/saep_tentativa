@@ -1,23 +1,22 @@
 {
-  "name": "sep-innovatis",
   "version": 2,
-  "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install",
-  "framework": "nextjs",
-  "functions": {
-    "app/api/**/*.js": {
-      "maxDuration": 30
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next",
+      "config": {}
     }
-  },
+  ],
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/(.*)", "dest": "/$1" }
+  ],
   "build": {
     "env": {
       "NODE_OPTIONS": "--max-old-space-size=4096"
     }
   },
-  "rewrites": [
-    {
-      "source": "/api/:path*",
       "destination": "https://p01--emendas-backend--c7pb86lv22r8.code.run/api/:path*"
     }
   ],
