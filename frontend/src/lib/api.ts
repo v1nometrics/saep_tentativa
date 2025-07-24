@@ -96,9 +96,12 @@ function parseMonetaryValue(value: any): number {
   }
   
   if (typeof value === 'string') {
-    // Remover pontos (separadores de milhares) e converter
-    const cleanValue = value.replace(/\./g, '');
-    return parseFloat(cleanValue);
+    // Remover separador de milhares e substituir vírgula decimal por ponto
+    const cleanValue = value
+      .replace(/\./g, '')      // remove pontos (milhares)
+      .replace(/,/g, '.');      // vírgula decimal → ponto
+    const parsed = parseFloat(cleanValue);
+    return isNaN(parsed) ? 0 : parsed;
   }
   
   // Este caso nunca deveria acontecer com dados SIOP válidos
