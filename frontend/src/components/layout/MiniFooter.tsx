@@ -16,7 +16,7 @@ const MiniFooter: FC = () => {
           </div>
 
           {/* Copyright */}
-          <div className="text-center space-x-2">
+          <div className="flex flex-wrap items-center justify-center space-x-6">
             <span>© {currentYear} Innovatis</span><span>|</span><span>Powered by Data Science Team</span><span>|</span><span>All rights reserved</span>
           </div>
 
