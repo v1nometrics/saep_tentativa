@@ -2,6 +2,7 @@
 
 import { ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
+import MiniFooter from './MiniFooter';
 
 type MainLayoutProps = {
   children: ReactNode;
@@ -18,6 +19,7 @@ export function MainLayout({ children }: MainLayoutProps) {
   return (
     <>
       {children}
+      <MiniFooter />
     </>
   );
 }

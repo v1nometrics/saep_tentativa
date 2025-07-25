@@ -16,6 +16,45 @@
 
 ## 🚀 HISTÓRICO DE VERSÕES E IMPLEMENTAÇÕES
 
+### 🆕 v6.1.2 - APRIMORAMENTOS DE LOGIN E UI (25/07/2025)
+
+#### 🎯 **OBJETIVO PRINCIPAL**
+Expandir as formas de autenticação e refinar detalhes visuais da interface.
+
+#### 🔑 **AUTENTICAÇÃO E USUÁRIOS**
+1. **Login por e-mail OU nome de usuário**
+   - **Arquivo**: `frontend/src/app/api/login/route.ts`
+   - Suporte a três campos de identificação: `email`, `username` ou `identifier`.
+   - Busca primeiro por e-mail; se falhar, tenta `username`.
+2. **Estrutura de Usuário Atualizada**
+   - `username` adicionado ao tipo `User`.
+   - Novo conjunto em `frontend/config/users.json`:
+     | Email | Username | Papel |
+     |-------|----------|-------|
+     | vinicius.torres@innovatismc.com | v1 | admin |
+     | epitacio@innovatismc.com | epitacio | viewer |
+     | andrea.albuquerque@innovatismc.com | andrea | viewer |
+     | gregory.gentle@innovatismc.com | gregory | viewer |
+     | victor.eduardo@innovatismc.com | evitu | viewer |
+
+#### 🎨 **MELHORIAS DE INTERFACE**
+1. **Favicon Institucional**
+   - **Arquivo**: `frontend/src/app/layout.tsx`
+   - `<link rel="icon" href="/logo-innovatis.png" />` garantido no `<head>`.
+2. **Limpeza do Alerta SIOP**
+   - **Arquivo**: `frontend/src/app/page.tsx`
+   - Removidos botões "Atualizar Dados SIOP" e "Recarregar Página" abaixo do aviso "Dados SIOP indisponíveis".
+3. **Mensagem de Boas-Vindas**
+   - **Arquivo**: `frontend/src/app/login/page.tsx`
+   - Quebra de linha adicionada: "Bem-vindo de volta!" \<br/> "Por favor, insira seus dados.".
+
+#### ✅ **RESULTADOS**
+- Usuários podem entrar tanto por e-mail quanto por nome de usuário.
+- Lista de contas atualizada e versionada no repositório.
+- Interface mais limpa e consistente com identidade visual Innovatis.
+
+---
+
 ### 🛠 v6.1.1 - CORREÇÕES DE CONSISTÊNCIA E VALORES MONETÁRIOS (24/07/2025)
 
 #### 🎯 **OBJETIVO PRINCIPAL**

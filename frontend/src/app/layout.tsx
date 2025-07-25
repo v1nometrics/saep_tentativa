@@ -30,10 +30,10 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
   icons: {
     icon: [
-      { url: '/logo-innovatis.png', sizes: 'any', type: 'image/png' },
+      { url: '/logo_innovatis_preta.svg', type: 'image/svg+xml' },
     ],
     apple: [
-      { url: '/logo-innovatis.png', sizes: '180x180', type: 'image/png' },
+      { url: '/logo_innovatis_preta.svg', sizes: 'any', type: 'image/svg+xml' },
     ],
   },
   appleWebApp: {
@@ -55,7 +55,7 @@ export default function RootLayout({
     <html lang="pt-BR" className="h-full">
       <head>
         {/* Favicon */}
-        <link rel="icon" href="/logo-innovatis.png" />
+        <link rel="icon" href="/logo_innovatis_preta.svg" type="image/svg+xml" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
