@@ -99,7 +99,7 @@ export default function LoginPage() {
         {/* Coluna do Formulário (Escura) */}
         <div className="w-full md:w-1/2 p-8 md:p-12 bg-slate-900">
           <h2 className="text-2xl font-bold text-white mb-1">Acesse sua conta</h2>
-          <p className="text-slate-300 mb-8">Bem-vindo de volta! Por favor, insira seus dados.</p>
+          <p className="text-slate-300 mb-8">Bem-vindo de volta!<br/>Por favor, insira seus dados.</p>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Adiciona o token CSRF como um campo oculto apenas se existir */}
             {csrfToken && (
