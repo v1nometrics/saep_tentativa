@@ -371,29 +371,25 @@ def convert_dataframe_to_json(df: pd.DataFrame) -> List[Dict]:
             
             # Função para converter cada valor
             def clean_monetary_value(val):
+                """Limpa e converte um valor monetário (string ou numérico) para float."""
                 if pd.isna(val) or val is None or val == '':
                     return 0.0
                 
-                # Se já é número, manter
                 if isinstance(val, (int, float)):
                     return float(val)
                 
-                # Se é string, limpar e converter
                 if isinstance(val, str):
                     try:
-                        # Conversão formato BRL → float
-            # Ex.: "1.234,56" → "1234.56"
-            clean_val = str(val).strip()
-            clean_val = clean_val.replace('.', '').replace(',', '.').replace(' ', '')
+                        clean_val = str(val).strip()
+                        # Lógica para formato brasileiro: "1.234,56" → "1234.56"
+                        clean_val = clean_val.replace('.', '').replace(',', '.')
                         
-                        # Se ficou vazio, retornar 0
-                        if not clean_val or clean_val == 'N/A' or clean_val.lower() == 'nan':
+                        if not clean_val or clean_val.lower() in ['na', 'n/a', 'nan']:
                             return 0.0
                         
-                        # Converter para float
                         return float(clean_val)
                     except (ValueError, TypeError):
-                        logger.warning(f"⚠️ Não foi possível converter valor '{val}' da coluna '{col}'")
+                        logger.warning(f"⚠️ Não foi possível converter o valor monetário '{val}' para número.")
                         return 0.0
                 
                 return 0.0
