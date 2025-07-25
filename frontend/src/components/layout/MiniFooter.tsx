@@ -6,22 +6,22 @@ const MiniFooter: FC = () => {
 
   return (
     <footer className="w-full bg-gray-100 border-t border-gray-200 text-sm text-gray-600 mt-8">
-      <div className="max-w-screen-xl mx-auto px-4 py-6">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+      <div className="w-full px-6 lg:px-8 py-6">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           {/* Links */}
-          <div className="flex justify-center md:justify-start space-x-2 whitespace-nowrap">
+          <div className="space-x-2 whitespace-nowrap">
             <span className="hover:text-gray-800 cursor-pointer">Termo de Uso</span>
             <span>|</span>
             <span className="hover:text-gray-800 cursor-pointer">Privacidade & Política</span>
           </div>
 
           {/* Copyright */}
-          <div className="text-center">
+          <div className="text-center md:text-left">
             © {currentYear} Innovatis MC. Todos os direitos reservados.
           </div>
 
           {/* Credits */}
-          <div className="flex justify-center md:justify-end text-gray-600 hover:text-gray-800">
+          <div className="text-gray-600 hover:text-gray-800 md:text-right">
             Powered by Data Science Team – Innovatis MC
           </div>
         </div>
