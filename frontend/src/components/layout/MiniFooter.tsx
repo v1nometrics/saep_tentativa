@@ -16,8 +16,8 @@ const MiniFooter: FC = () => {
           </div>
 
           {/* Copyright */}
-          <div className="text-center">
-            © {currentYear} Innovatis. Todos os direitos reservados. Powered by Data Science Team
+          <div className="text-center space-x-2">
+            <span>© {currentYear} Innovatis</span><span>|</span><span>Powered by Data Science Team</span><span>|</span><span>All rights reserved</span>
           </div>
 
           {/* Credits */}
