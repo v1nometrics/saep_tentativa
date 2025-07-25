@@ -87,64 +87,21 @@ export interface Opportunity {
 
 // Função auxiliar para converter valor monetário SIOP (formato brasileiro)
 function parseMonetaryValue(value: any): number {
-  // CORREÇÃO: Detecta e converte valores que estão em milhares de reais
-  // Valores típicos de emendas são >= R$ 10.000, então valores < 100.000
-  // podem estar em escala de milhares
+  // FORMATO SIOP: valores já em reais com pontos como separadores de milhares
+  // Exemplos: "500.000" = R$ 500.000, "2.000.000" = R$ 2.000.000, "0" = R$ 0
+  // DADOS SEMPRE VÁLIDOS: nunca null, undefined ou string vazia
   
   if (typeof value === 'number') {
-    // Se o valor é muito pequeno comparado ao esperado (< 100000 mas > 0),
-    // pode estar em milhares de reais
-    if (value > 0 && value < 100000) {
-      // Verificar se multiplicando por 1000 faz mais sentido
-      // (valores típicos de emendas são >= 10.000)
-      const scaledVal = value * 1000;
-      if (scaledVal >= 10000) {  // Valor mínimo do filtro
-        console.debug(`🔄 Convertendo valor ${value} → ${scaledVal} (escala de milhares)`);
-        return scaledVal;
-      }
-    }
-    return value;
+    return value; // Já é um número em reais
   }
   
   if (typeof value === 'string') {
-    const cleanValue = value.trim();
-    
-    // Detectar formato brasileiro: "1.234,56" → "1234.56"
-    let processedValue: string;
-    if (cleanValue.includes(',') && cleanValue.includes('.')) {
-      // Formato brasileiro: pontos são milhares, vírgula é decimal
-      processedValue = cleanValue.replace(/\./g, '').replace(',', '.');
-    } else if (cleanValue.includes(',') && !cleanValue.includes('.')) {
-      // Apenas vírgula decimal
-      processedValue = cleanValue.replace(',', '.');
-    } else {
-      // Apenas pontos - podem ser milhares ou decimal
-      // Se tem mais de um ponto, são milhares
-      if ((cleanValue.match(/\./g) || []).length > 1) {
-        processedValue = cleanValue.replace(/\./g, '');
-      }
-      // Se tem um ponto e mais de 3 dígitos após, são milhares
-      else if (cleanValue.includes('.') && cleanValue.split('.')[1]?.length > 3) {
-        processedValue = cleanValue.replace('.', '');
-      }
-      else {
-        processedValue = cleanValue;
-      }
-    }
-    
-    const parsed = parseFloat(processedValue);
-    if (isNaN(parsed)) return 0;
-    
-    // Aplicar mesma lógica de escala para strings convertidas
-    if (parsed > 0 && parsed < 100000) {
-      const scaledVal = parsed * 1000;
-      if (scaledVal >= 10000) {
-        console.debug(`🔄 Convertendo valor string ${parsed} → ${scaledVal} (escala de milhares)`);
-        return scaledVal;
-      }
-    }
-    
-    return parsed;
+    // Remover separador de milhares e substituir vírgula decimal por ponto
+    const cleanValue = value
+      .replace(/\./g, '')      // remove pontos (milhares)
+      .replace(/,/g, '.');      // vírgula decimal → ponto
+    const parsed = parseFloat(cleanValue);
+    return isNaN(parsed) ? 0 : parsed;
   }
   
   // Este caso nunca deveria acontecer com dados SIOP válidos

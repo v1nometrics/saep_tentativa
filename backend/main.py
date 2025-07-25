@@ -374,58 +374,24 @@ def convert_dataframe_to_json(df: pd.DataFrame) -> List[Dict]:
                 if pd.isna(val) or val is None or val == '':
                     return 0.0
                 
-                # Se já é número, verificar se precisa de conversão de escala
+                # Se já é número, manter
                 if isinstance(val, (int, float)):
-                    # Se o valor é muito pequeno comparado ao esperado (< 100000 mas > 0),
-                    # pode estar em milhares de reais
-                    if 0 < val < 100000:
-                        # Verificar se multiplicando por 1000 faz mais sentido
-                        # (valores típicos de emendas são >= 10.000)
-                        scaled_val = val * 1000
-                        if scaled_val >= 10000:  # Valor mínimo do filtro
-                            logger.debug(f"🔄 Convertendo valor {val} → {scaled_val} (escala de milhares)")
-                            return float(scaled_val)
                     return float(val)
                 
                 # Se é string, limpar e converter
                 if isinstance(val, str):
                     try:
-                        # Remover pontos de milhares e espaços
-                        clean_val = str(val).strip()
-                        
-                        # Detectar formato brasileiro: "1.234,56" → "1234.56"
-                        if ',' in clean_val and '.' in clean_val:
-                            # Formato brasileiro: pontos são milhares, vírgula é decimal
-                            clean_val = clean_val.replace('.', '').replace(',', '.')
-                        elif ',' in clean_val and '.' not in clean_val:
-                            # Apenas vírgula decimal
-                            clean_val = clean_val.replace(',', '.')
-                        else:
-                            # Apenas pontos - podem ser milhares ou decimal
-                            # Se tem mais de um ponto, são milhares
-                            if clean_val.count('.') > 1:
-                                clean_val = clean_val.replace('.', '')
-                            # Se tem um ponto e mais de 3 dígitos após, são milhares
-                            elif '.' in clean_val and len(clean_val.split('.')[-1]) > 3:
-                                clean_val = clean_val.replace('.', '')
-                        
-                        clean_val = clean_val.replace(' ', '')
+                        # Conversão formato BRL → float
+            # Ex.: "1.234,56" → "1234.56"
+            clean_val = str(val).strip()
+            clean_val = clean_val.replace('.', '').replace(',', '.').replace(' ', '')
                         
                         # Se ficou vazio, retornar 0
                         if not clean_val or clean_val == 'N/A' or clean_val.lower() == 'nan':
                             return 0.0
                         
                         # Converter para float
-                        converted_val = float(clean_val)
-                        
-                        # Aplicar mesma lógica de escala para strings convertidas
-                        if 0 < converted_val < 100000:
-                            scaled_val = converted_val * 1000
-                            if scaled_val >= 10000:
-                                logger.debug(f"🔄 Convertendo valor string {converted_val} → {scaled_val} (escala de milhares)")
-                                return float(scaled_val)
-                        
-                        return converted_val
+                        return float(clean_val)
                     except (ValueError, TypeError):
                         logger.warning(f"⚠️ Não foi possível converter valor '{val}' da coluna '{col}'")
                         return 0.0

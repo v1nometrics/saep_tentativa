@@ -458,7 +458,8 @@ class S3Service:
                     sep=separator, 
                     encoding=encoding, 
                     low_memory=False, 
-                    skiprows=[1]  # Pular primeira linha se for header duplicado
+                    skiprows=[1],  # Pular primeira linha se for header duplicado
+                    dtype=str      # ← força leitura como string para manter formatação brasileira
                 )
                 
                 # Verificar se DataFrame é válido
