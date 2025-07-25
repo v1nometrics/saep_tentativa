@@ -13,6 +13,7 @@ API simples para:
 INÍCIO SIMPLES - EXPANSÍVEL
 """
 
+from pathlib import Path
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
@@ -477,6 +478,38 @@ async def health_check():
         }
     
     return health_info
+
+@app.post("/api/clear-cache")
+async def clear_cache():
+    """
+    Endpoint para forçar a limpeza de todos os caches (dados e JSON).
+    """
+    global cached_opportunities, last_update, _cached_full_json_records, _cached_full_json_hash
+    
+    cache_dir = Path("./cache_data")
+    files_deleted = []
+    
+    if cache_dir.exists():
+        for f in cache_dir.glob("*.pkl"):
+            try:
+                f.unlink()
+                files_deleted.append(str(f))
+            except OSError as e:
+                logger.error(f"Erro ao deletar cache {f}: {e}")
+
+    # Resetar variáveis de cache em memória
+    cached_opportunities = None
+    last_update = None
+    _cached_full_json_records = None
+    _cached_full_json_hash = None
+    
+    logger.info("Cache em memória e arquivos .pkl foram limpos.")
+    
+    return {
+        "message": "Cache limpo com sucesso.",
+        "files_deleted": files_deleted,
+        "timestamp": utc_now().isoformat()
+    }
 
 @app.post("/api/trigger-etl")
 async def trigger_etl(background_tasks: BackgroundTasks):
