@@ -7,9 +7,9 @@ const MiniFooter: FC = () => {
   return (
     <footer className="w-full bg-gray-100 border-t border-gray-200 text-sm text-gray-600 mt-8">
       <div className="max-w-screen-xl mx-auto px-6 py-6">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+        <div className="flex justify-center">
           {/* Links */}
-          <div className="flex justify-center md:justify-start space-x-2 whitespace-nowrap">
+          <div className="hidden">
             <span className="hover:text-gray-800 cursor-pointer">Termo de Uso</span>
             <span>|</span>
             <span className="hover:text-gray-800 cursor-pointer">Privacidade & Política</span>
@@ -17,11 +17,11 @@ const MiniFooter: FC = () => {
 
           {/* Copyright */}
           <div className="text-center">
-            © {currentYear} Innovatis. Todos os direitos reservados.
+            © {currentYear} Innovatis. Todos os direitos reservados. Powered by Data Science Team
           </div>
 
           {/* Credits */}
-          <div className="flex justify-center md:justify-end text-gray-600 hover:text-gray-800">
+          <div className="hidden">
             Powered by Data Science Team – Innovatis
           </div>
         </div>
