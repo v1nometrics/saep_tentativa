@@ -395,55 +395,42 @@ def convert_dataframe_to_json(df: pd.DataFrame) -> List[Dict]:
     # Limpar cache periodicamente
     _cleanup_json_cache()
     
-    # Processar colunas monetárias (dados reais do S3)
+    # -------- 1. Conversão vetorizada de colunas monetárias --------
     monetary_columns = [
-        'Dotação Inicial Emenda', 'Dotação Atual Emenda', 
-        'Empenhado', 'Liquidado', 'Pago'
+        'Dotação Inicial Emenda',
+        'Dotação Atual Emenda',
+        'Empenhado',
+        'Liquidado',
+        'Pago',
     ]
-    
-    # Converter colunas monetárias no DataFrame antes de serializar
-    for col in monetary_columns:
-        if col in df.columns:
-            logger.info(f"💰 Processando coluna '{col}'...")
-            
-            # Função para converter cada valor
-            def clean_monetary_value(val):
-                """Limpa e converte um valor monetário (string ou numérico) para float."""
-                if pd.isna(val) or val is None or val == '':
-                    return 0.0
-                
-                if isinstance(val, (int, float)):
-                    return float(val)
-                
-                if isinstance(val, str):
-                    try:
-                        clean_val = str(val).strip()
-                        # Lógica para formato brasileiro: "1.234,56" → "1234.56"
-                        clean_val = clean_val.replace('.', '').replace(',', '.')
-                        
-                        if not clean_val or clean_val.lower() in ['na', 'n/a', 'nan']:
-                            return 0.0
-                        
-                        return float(clean_val)
-                    except (ValueError, TypeError):
-                        logger.warning(f"⚠️ Não foi possível converter o valor monetário '{val}' para número.")
-                        return 0.0
-                
-                return 0.0
-            
-            # Aplicar conversão na coluna inteira (usando .loc para evitar SettingWithCopyWarning)
-            df.loc[:, col] = df[col].apply(clean_monetary_value)
-            
-            # Log de amostra
+    existing_monetary_cols = [c for c in monetary_columns if c in df.columns]
+
+    if existing_monetary_cols:
+        logger.info(f"💰 Processando colunas monetárias {existing_monetary_cols} (vectorized)...")
+
+        # Conversão vetorizada por coluna (DataFrame não tem .str, mas Series sim)
+        for col in existing_monetary_cols:
+            df[col] = (
+                df[col]
+                .fillna('0')
+                .astype(str)
+                .str.replace('.', '', regex=False)
+                .str.replace(',', '.', regex=False)
+                .replace({'': '0', 'na': '0', 'n/a': '0', 'nan': '0'})
+                .astype(float)
+            )
+
+        # Logging básico de amostra
+        for col in existing_monetary_cols:
             sample_values = df[col].head(3).tolist()
             non_zero_count = (df[col] > 0).sum()
             logger.info(f"   Amostra de '{col}': {sample_values}")
             logger.info(f"   Valores > 0: {non_zero_count}/{len(df)}")
-    
-    # Converter DataFrame para JSON
+
+    # -------- 2. Serializar para records primeiro --------
     records = df.to_dict('records')
-    
-    # NORMALIZAÇÃO DE CAMPOS: Converter nomes ETL → Frontend
+
+    # -------- 3. Normalizar campos mantendo compatibilidade --------
     logger.info(f"🔄 Normalizando nomes de campos para o frontend...")
     normalized_records = []
     
@@ -452,15 +439,15 @@ def convert_dataframe_to_json(df: pd.DataFrame) -> List[Dict]:
         normalized_records.append(normalized_record)
     
     logger.info(f"✅ Normalização concluída: {len(normalized_records)} registros")
-    
-    # Salvar no cache para futuras requisições
+
+    # -------- 4. Cache --------
     _json_conversion_cache[df_hash] = {
         'data': normalized_records,
         'timestamp': utc_now(),
-        'size': len(normalized_records)
+        'size': len(normalized_records),
     }
-    
-    logger.info(f"✅ Conversão concluída: {len(normalized_records)} registros (cache salvo: {df_hash[:8]}...)")
+
+    logger.info(f"✅ Conversão finalizada e cache salvo: {df_hash[:8]}...")
     return normalized_records
 
 @app.get("/")
@@ -617,19 +604,24 @@ async def search_opportunities(
         
         # HIERARQUIA: PRIMEIRO aplicar filtros, DEPOIS busca
         logger.info(f"🔍 Busca por: '{q}' | Filtros: years={years}, rp={rp}, modalidades={modalidades}")
+        logger.info(f"🔍 DEBUG - Registros iniciais no cache: {len(cached_opportunities)}")
         
         # ETAPA 1: Aplicar todos os filtros PRIMEIRO (hierarquia)
         filtered_data = cached_opportunities.copy()
         filters_applied = []
+        logger.info(f"🔍 DEBUG - Iniciando com {len(filtered_data)} registros")
         
         # 1. Aplicar filtro de anos (se especificado)
         if years:
             try:
                 year_list = [int(y.strip()) for y in years.split(',') if y.strip()]
                 if year_list:
-                    filtered_data = filtered_data[filtered_data['Ano'].isin(year_list)]
+                    ano_col = pd.to_numeric(filtered_data['Ano'], errors='coerce')
+                    filtered_data = filtered_data[ano_col.isin(year_list)]
                     filters_applied.append(f"Anos: {year_list}")
                     logger.info(f"📅 Filtro anos aplicado: {year_list} → {len(filtered_data)} registros")
+                    if len(filtered_data) == 0:
+                        logger.warning(f"⚠️ FILTRO ANOS ZEROU OS DADOS! Verificar se anos {year_list} existem no dataset")
             except ValueError:
                 logger.warning(f"Anos inválidos: {years}")
         
@@ -638,8 +630,21 @@ async def search_opportunities(
             try:
                 rp_list = [int(r.strip()) for r in rp.split(',') if r.strip()]
                 if rp_list and 'RP' in filtered_data.columns:
-                    # Buscar registros que contenham qualquer dos RPs selecionados
-                    rp_mask = filtered_data['RP'].str.contains('|'.join([f'{rp_num}' for rp_num in rp_list]), na=False)
+                    # DEBUG: Verificar valores únicos na coluna RP
+                    unique_rp_values = filtered_data['RP'].unique()[:10]  # Primeiros 10
+                    logger.info(f"🔍 DEBUG RP - Valores únicos encontrados: {unique_rp_values}")
+                    logger.info(f"🔍 DEBUG RP - Tipo da coluna: {filtered_data['RP'].dtype}")
+                    logger.info(f"🔍 DEBUG RP - Buscando por: {rp_list}")
+                    
+                    # Extrair apenas o número do início da string (ex: "6 - Emendas Individuais" → 6)
+                    rp_col = filtered_data['RP'].astype(str).str.extract(r'^(\d+)', expand=False)
+                    rp_col = pd.to_numeric(rp_col, errors='coerce')
+                    logger.info(f"🔍 DEBUG RP - Após extração numérica, valores únicos: {rp_col.unique()[:10]}")
+                    
+                    rp_mask = rp_col.isin(rp_list)
+                    matches_found = rp_mask.sum()
+                    logger.info(f"🔍 DEBUG RP - Matches encontrados: {matches_found}")
+                    
                     filtered_data = filtered_data[rp_mask]
                     filters_applied.append(f"RP: {rp_list}")
                     logger.info(f"🎯 Filtro RP aplicado: {rp_list} → {len(filtered_data)} registros")
@@ -651,11 +656,22 @@ async def search_opportunities(
             try:
                 modal_list = [m.strip() for m in modalidades.split(',') if m.strip()]
                 if modal_list and 'Modalidade' in filtered_data.columns:
-                    # Buscar registros que contenham qualquer das modalidades selecionadas
-                    modal_mask = filtered_data['Modalidade'].str.contains('|'.join(modal_list), na=False)
+                    # DEBUG: Verificar valores únicos na coluna Modalidade
+                    unique_modal_values = filtered_data['Modalidade'].unique()[:10]
+                    logger.info(f"🔍 DEBUG Modalidade - Valores únicos encontrados: {unique_modal_values}")
+                    logger.info(f"🔍 DEBUG Modalidade - Buscando por: {modal_list}")
+                    
+                    # Extrair apenas o número do início da string da modalidade
+                    modal_col = filtered_data['Modalidade'].astype(str).str.extract(r'^(\d+)', expand=False)
+                    modal_mask = modal_col.isin(modal_list)
+                    matches_found = modal_mask.sum()
+                    logger.info(f"🔍 DEBUG Modalidade - Matches encontrados: {matches_found}")
+                    
                     filtered_data = filtered_data[modal_mask]
                     filters_applied.append(f"Modalidades: {modal_list}")
-                    logger.info(f"🏛️ Filtro modalidades aplicado: {modal_list} → {len(filtered_data)} registros")
+                    logger.info(
+                        f"🏛️ Filtro modalidades aplicado: {modal_list} → {len(filtered_data)} registros"
+                    )
             except ValueError:
                 logger.warning(f"Modalidades inválidas: {modalidades}")
 
@@ -664,8 +680,18 @@ async def search_opportunities(
             try:
                 uf_list = [u.strip().upper() for u in ufs.split(',') if u.strip()]
                 if uf_list and 'UF Autor' in filtered_data.columns:
-                    # Buscar registros que contenham qualquer das UFs selecionadas
-                    filtered_data = filtered_data[filtered_data['UF Autor'].isin(uf_list)]
+                    # DEBUG: Verificar valores únicos na coluna UF Autor
+                    unique_uf_values = filtered_data['UF Autor'].unique()[:10]
+                    logger.info(f"🔍 DEBUG UF - Valores únicos encontrados: {unique_uf_values}")
+                    logger.info(f"🔍 DEBUG UF - Buscando por: {uf_list}")
+                    
+                    # Normalizar UF para comparação (remover espaços e converter para maiúsculas)
+                    uf_col = filtered_data['UF Autor'].astype(str).str.strip().str.upper()
+                    uf_mask = uf_col.isin(uf_list)
+                    matches_found = uf_mask.sum()
+                    logger.info(f"🔍 DEBUG UF - Matches encontrados: {matches_found}")
+                    
+                    filtered_data = filtered_data[uf_mask]
                     filters_applied.append(f"UFs: {uf_list}")
                     logger.info(f"🗺️ Filtro UFs aplicado: {uf_list} → {len(filtered_data)} registros")
             except ValueError:
@@ -676,8 +702,18 @@ async def search_opportunities(
             try:
                 partido_list = [p.strip().upper() for p in partidos.split(',') if p.strip()]
                 if partido_list and 'Partido' in filtered_data.columns:
-                    # Buscar registros que contenham qualquer dos partidos selecionados
-                    filtered_data = filtered_data[filtered_data['Partido'].isin(partido_list)]
+                    # DEBUG: Verificar valores únicos na coluna Partido
+                    unique_partido_values = filtered_data['Partido'].unique()[:10]
+                    logger.info(f"🔍 DEBUG Partido - Valores únicos encontrados: {unique_partido_values}")
+                    logger.info(f"🔍 DEBUG Partido - Buscando por: {partido_list[:5]}...")  # Primeiros 5
+                    
+                    # Normalizar Partido para comparação (remover espaços e converter para maiúsculas)
+                    partido_col = filtered_data['Partido'].astype(str).str.strip().str.upper()
+                    partido_mask = partido_col.isin(partido_list)
+                    matches_found = partido_mask.sum()
+                    logger.info(f"🔍 DEBUG Partido - Matches encontrados: {matches_found}")
+                    
+                    filtered_data = filtered_data[partido_mask]
                     filters_applied.append(f"Partidos: {partido_list}")
                     logger.info(f"🏛️ Filtro partidos aplicado: {partido_list} → {len(filtered_data)} registros")
             except ValueError:
@@ -687,9 +723,16 @@ async def search_opportunities(
         if ministry:
             orgao_col = 'Órgão' if 'Órgão' in filtered_data.columns else 'orgao_orcamentario'
             if orgao_col in filtered_data.columns:
-                filtered_data = filtered_data[
-                    filtered_data[orgao_col].str.contains(ministry, case=False, na=False)
-                ]
+                # DEBUG: Verificar valores únicos na coluna Órgão
+                unique_orgao_values = filtered_data[orgao_col].unique()[:5]
+                logger.info(f"🔍 DEBUG Órgão - Valores únicos encontrados: {unique_orgao_values}")
+                logger.info(f"🔍 DEBUG Órgão - Buscando por: {ministry}")
+                
+                ministry_mask = filtered_data[orgao_col].astype(str).str.contains(ministry, case=False, na=False)
+                matches_found = ministry_mask.sum()
+                logger.info(f"🔍 DEBUG Órgão - Matches encontrados: {matches_found}")
+                
+                filtered_data = filtered_data[ministry_mask]
                 filters_applied.append(f"Ministério: {ministry}")
                 logger.info(f"🏢 Filtro ministério aplicado: {ministry} → {len(filtered_data)} registros")
         

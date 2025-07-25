@@ -1,3 +1,57 @@
+# 📚 DOCUMENTAÇÃO CONSOLIDADA COMPLETA - SISTEMA DE ANÁLISE DE EMENDAS PARLAMENTARES v6.1.4
+
+## 🆕 v6.1.4 - CORREÇÕES DE FILTROS E MELHORIAS DE DEBUG (25/07/2025)
+
+### 🎯 OBJETIVO PRINCIPAL
+Corrigir problemas de filtragem no backend e adicionar logs detalhados para facilitar a depuração.
+
+### 🛠️ MELHORIAS IMPLEMENTADAS
+
+#### 1. CORREÇÕES NOS FILTROS
+- **Filtro RP**: 
+  - Problema: Coluna RP continha strings descritivas (ex: "6 - Emendas Individuais") em vez de valores numéricos
+  - Solução: Extração do prefixo numérico usando regex `r'^(\d+)'` antes da conversão
+  - Impacto: Filtro agora funciona corretamente, retornando 32.095 registros para RP [6,7,8]
+
+- **Filtro Modalidade**:
+  - Mesma abordagem do filtro RP aplicada à coluna Modalidade
+  - Extração do código numérico para comparação
+  - Corrigido erro de referência à variável `pattern` não definida
+
+- **Normalização de Dados**:
+  - Colunas UF e Partido agora são normalizadas (trim + uppercase) antes da comparação
+  - Garante correspondência case-insensitive e ignora espaços em branco extras
+
+#### 2. MELHORIAS DE LOGGING
+- Adicionados logs detalhados para cada estágio de filtragem:
+  - Contagem inicial de registros
+  - Valores únicos nas colunas filtradas
+  - Número de correspondências encontradas
+  - Avisos quando filtros resultam em conjunto vazio
+  - Exemplos de valores antes/depois da conversão
+
+- Novo endpoint de debug:
+  - `/api/debug/codigo-emenda` para análise de códigos únicos e duplicatas
+  - Estatísticas detalhadas sobre a qualidade dos dados
+
+#### 3. MELHORIAS DE CÓDIGO
+- Refatoração da lógica de filtragem para maior clareza
+- Tratamento de erros aprimorado
+- Documentação atualizada
+
+### 📊 RESULTADOS
+- Filtros RP e Modalidade agora funcionam corretamente
+- Melhor visibilidade sobre o processo de filtragem através dos logs
+- Código mais robusto e fácil de manter
+- Base para correção de outros filtros, se necessário
+
+### ⚠️ PRÓXIMOS PASSOS
+1. Monitorar logs em produção para identificar possíveis problemas
+2. Considerar migração para tipos de dados mais apropriados no futuro
+3. Avaliar a necessidade de limpeza adicional dos dados de origem
+
+---
+
 # 📚 DOCUMENTAÇÃO CONSOLIDADA COMPLETA - SISTEMA DE ANÁLISE DE EMENDAS PARLAMENTARES v6.1.0
 
 ## 🏛️ VISÃO GERAL DO PROJETO
