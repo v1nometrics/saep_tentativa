@@ -9,7 +9,8 @@ export const runtime = 'nodejs';
 type User = {
   password: string;
   role: string;
-  name: string;
+  username?: string; // novo campo para autenticação por usuário
+  name?: string;     // opcional: nome completo ou de exibição
 };
 
 // Cache de usuários em memória (opcional, para performance)
@@ -33,25 +34,38 @@ async function loadUsers() {
 // Endpoint de login
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json();
+    const { email, username, identifier, password } = await request.json();
+    const loginId: string | undefined = email || username || identifier;
 
     // Validação básica
-    if (!email || !password) {
+    if (!loginId || !password) {
       return NextResponse.json(
-        { success: false, message: 'E-mail e senha são obrigatórios' },
+        { success: false, message: 'Identificador e senha são obrigatórios' },
         { status: 400 }
       );
     }
 
     // Carregar usuários
     const users = await loadUsers();
-    const user = users[email];
+    let userEmail: string | null = null;
+    let user: User | undefined = users[loginId]; // tenta primeiro como e-mail
+
+    // Se não encontrou por e-mail, tenta buscar por username
+    if (!user) {
+      for (const [mail, u] of Object.entries(users)) {
+        if (u.username && u.username === loginId) {
+          user = u as User;
+          userEmail = mail;
+          break;
+        }
+      }
+    } else {
+      userEmail = loginId;
+    }
 
     // Verificar credenciais
-    if (!user || user.password !== password) {
-      // Log de tentativa de login inválida (em produção, use um serviço de logging)
-      console.warn(`Tentativa de login inválida para o e-mail: ${email}`);
-      
+    if (!user || user.password !== password || !userEmail) {
+      console.warn(`Tentativa de login inválida para o identificador: ${loginId}`);
       return NextResponse.json(
         { success: false, message: 'Credenciais inválidas' },
         { status: 401 }
@@ -59,14 +73,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Gerar tokens
-    const { accessToken, refreshToken } = generateTokenPair(email);
-    
+    const { accessToken, refreshToken } = generateTokenPair(userEmail);
+
     // Criar e retornar resposta de autenticação
     return createAuthResponse(
       {
         success: true,
-        email,
-        name: user.name,
+        email: userEmail,
+        username: user.username ?? null,
         role: user.role,
       },
       accessToken,

@@ -36,6 +36,42 @@ from services.etl_service import ETLService
 # Carregar variáveis de ambiente
 load_dotenv()
 
+# ------------------------------
+# FUNÇÕES DE SUPORTE GLOBAL PARA BUSCA RÁPIDA
+# ------------------------------
+
+def _normalize_text(text: str) -> str:
+    """Normaliza texto removendo acentos, múltiplos espaços e converte para minúsculas."""
+    if text is None or (isinstance(text, float) and pd.isna(text)):
+        return ""
+    text = str(text).lower()
+    text = unicodedata.normalize('NFD', text)
+    text = ''.join(ch for ch in text if unicodedata.category(ch) != 'Mn')
+    text = re.sub(r'\s+', ' ', text).strip()
+    return text
+
+
+def _build_search_blob(df: pd.DataFrame) -> pd.Series:
+    """Cria coluna agregada já normalizada para busca vetorizada."""
+    text_cols = [
+        'Autor', 'Ação', 'Localizador', 'Órgão', 'UO', 'Partido',
+        'UF Autor', 'Tipo Autor', 'RP', 'Modalidade', 'Natureza Despesa',
+        'GND', 'Codigo_Emenda'
+    ]
+    existing_cols = [c for c in text_cols if c in df.columns]
+    # Se nenhuma das colunas pré-definidas existir, usa TODAS as colunas disponíveis
+    if not existing_cols:
+        existing_cols = df.columns.tolist()
+    blob = (
+        df[existing_cols]
+        .fillna('')
+        .astype(str)
+        .agg(' '.join, axis=1)
+        .map(_normalize_text)
+    )
+    return blob
+
+
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -750,6 +786,40 @@ async def search_opportunities(
             
             # Normalizar termo de busca e gerar variações
             search_patterns = normalize_search_term(search_term)
+            logger.info(f"🔍 Padrões de busca gerados: {search_patterns[:3]}...")
+
+            # ---------- NOVA BUSCA VETORIZADA ----------
+            if 'search_blob' not in filtered_data.columns:
+                filtered_data['search_blob'] = _build_search_blob(filtered_data)
+
+            regex_pattern = '|'.join([re.escape(p) for p in search_patterns if p])
+            if regex_pattern:
+                filtered_data = filtered_data[filtered_data['search_blob'].str.contains(regex_pattern, na=False)]
+            logger.info(f"⚡ Busca vetorizada '{search_term}' → {len(filtered_data)} resultados após filtro")
+
+            # Paginação
+            total = len(filtered_data)
+            paged_data = filtered_data.iloc[offset:] if limit is None else filtered_data.iloc[offset:offset+limit]
+
+            # Converter para JSON
+            opportunities = convert_dataframe_to_json(paged_data)
+
+            response = {
+                "opportunities": opportunities,
+                "total": total,
+                "limit": limit,
+                "offset": offset,
+                "filters_applied": filters_applied,
+                "timestamp": utc_now().isoformat()
+            }
+
+            if include_stats_bool:
+                response["stats"] = {
+                    "available_after_filters": len(filtered_data),
+                    "cache_last_update": last_update
+                }
+
+            return response
             logger.info(f"🔍 Padrões de busca gerados: {search_patterns[:3]}...")  # Log apenas primeiros 3
             
             # Função para buscar em todos os campos (COM NORMALIZAÇÃO INTELIGENTE)
@@ -1534,6 +1604,7 @@ async def _process_siop_data(force_download: bool = False, source: str = "autom�
             logger.error(f"Stack trace completo: {traceback.format_exc()}")
         
         # 4. Atualizar cache global COM DADOS DEDUPLICADOS
+        deduplicated_data['search_blob'] = _build_search_blob(deduplicated_data)
         cached_opportunities = deduplicated_data
         last_update = utc_now().isoformat()
         

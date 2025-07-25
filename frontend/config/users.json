@@ -1,5 +1,9 @@
 {
-  "admin@gov.br": { "password": "admin123", "role": "admin" },
-  "user@gov.br": { "password": "user123", "role": "user" },
-  "vinicius.torres@innovatismc.com": { "password": "1919", "role": "admin" }
+  "admin@gov.br": { "password": "admin123", "role": "admin", "username": "admin" },
+  "user@gov.br": { "password": "user123", "role": "user", "username": "user" },
+  "vinicius.torres@innovatismc.com": { "password": "1919", "role": "admin", "username": "v1" },
+  "epitacio@innovatismc.com": { "password": "HgEB1234***", "role": "user", "username": "epitacio" },
+  "andrea.albuquerque@innovatismc.com": { "password": "InnovaLabs86", "role": "user", "username": "andrea" },
+  "gregory.gentle@innovatismc.com": { "password": "duvidoacertar", "role": "user", "username": "gregory" },
+  "victor.eduardo@innovatismc.com": { "password": "duvidoacertar@@", "role": "user", "username": "evitu" }
 }
