@@ -792,10 +792,21 @@ async def search_opportunities(
             if 'search_blob' not in filtered_data.columns:
                 filtered_data['search_blob'] = _build_search_blob(filtered_data)
 
-            regex_pattern = '|'.join([re.escape(p) for p in search_patterns if p])
-            if regex_pattern:
-                filtered_data = filtered_data[filtered_data['search_blob'].str.contains(regex_pattern, na=False)]
-            logger.info(f"⚡ Busca vetorizada '{search_term}' → {len(filtered_data)} resultados após filtro")
+            # Construir tokens para busca E (todas as palavras devem aparecer)
+            tokens: Set[str] = set()
+            for pat in search_patterns:
+                # Quebrar em tokens por espaço mantendo números/valores
+                for tok in pat.split():
+                    tok = tok.strip()
+                    if tok:
+                        tokens.add(tok)
+
+            if tokens:
+                # Aplicar filtro incremental (AND) – garante que todos os termos estejam presentes
+                for tok in tokens:
+                    tok_regex = re.escape(tok)
+                    filtered_data = filtered_data[filtered_data['search_blob'].str.contains(tok_regex, na=False)]
+                    logger.info(f" Busca vetorizada '{search_term}' → {len(filtered_data)} resultados após filtro")
 
             # Paginação
             total = len(filtered_data)

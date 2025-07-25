@@ -16,6 +16,38 @@
 
 ## 🚀 HISTÓRICO DE VERSÕES E IMPLEMENTAÇÕES
 
+### 🆕 v6.1.3 - MELHORIAS DE FAVICON E RODAPÉ (25/07/2025)
+
+#### 🎯 **OBJETIVO PRINCIPAL**
+Padronizar identidade visual (favicon) e criar rodapé institucional consistente em todas as páginas.
+
+#### 🖼️ **FAVICON**
+1. **Novo arquivo SVG** `frontend/public/logo_innovatis_preta.svg` adicionado.
+2. **`layout.tsx`** atualizado para referenciar o SVG com `type="image/svg+xml"`.
+
+#### 📐 **RODAPÉ INSTITUCIONAL**
+1. **Componente criado** `MiniFooter.tsx` em `frontend/src/components/layout/`.
+2. Estilo Tailwind: fundo cinza-100, borda cinza-200, texto cinza-600.
+3. Conteúdo centralizado: `© {ano} Innovatis | Powered by Data Science Team | All rights reserved`.
+4. Alinhamento horizontal ajustado para coincidir com logo e botão "Sair".
+5. Variações implementadas conforme feedback:
+   - Removido sufixo "MC".
+   - Texto traduzido para inglês.
+   - Maior espaçamento entre frases (`space-x-6`).
+
+#### 🔧 **LAYOUT**
+1. **`MainLayout.tsx`** importa e renderiza `<MiniFooter />` (omitido nas rotas de login).
+
+#### 🛠 **PÁGINA DE LOGIN**
+1. Label alterada para **"E-mail / Usuário"** e placeholder correspondente.
+
+#### ✅ **RESULTADOS**
+- Favicon SVG nítido e consistente em todos os ambientes.
+- Rodapé padronizado, responsivo e alinhado ao design da aplicação.
+- Interface de login mais clara sobre formatos aceitos.
+
+---
+
 ### 🆕 v6.1.2 - APRIMORAMENTOS DE LOGIN E UI (25/07/2025)
 
 #### 🎯 **OBJETIVO PRINCIPAL**
