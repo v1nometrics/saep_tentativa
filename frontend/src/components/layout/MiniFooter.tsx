@@ -17,12 +17,12 @@ const MiniFooter: FC = () => {
 
           {/* Copyright */}
           <div className="text-center">
-            © {currentYear} Innovatis MC. Todos os direitos reservados.
+            © {currentYear} Innovatis. Todos os direitos reservados.
           </div>
 
           {/* Credits */}
           <div className="flex justify-center md:justify-end text-gray-600 hover:text-gray-800">
-            Powered by Data Science Team – Innovatis MC
+            Powered by Data Science Team – Innovatis
           </div>
         </div>
       </div>
