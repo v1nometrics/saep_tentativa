@@ -395,42 +395,55 @@ def convert_dataframe_to_json(df: pd.DataFrame) -> List[Dict]:
     # Limpar cache periodicamente
     _cleanup_json_cache()
     
-    # -------- 1. Conversão vetorizada de colunas monetárias --------
+    # Processar colunas monetárias (dados reais do S3)
     monetary_columns = [
-        'Dotação Inicial Emenda',
-        'Dotação Atual Emenda',
-        'Empenhado',
-        'Liquidado',
-        'Pago',
+        'Dotação Inicial Emenda', 'Dotação Atual Emenda', 
+        'Empenhado', 'Liquidado', 'Pago'
     ]
-    existing_monetary_cols = [c for c in monetary_columns if c in df.columns]
-
-    if existing_monetary_cols:
-        logger.info(f"💰 Processando colunas monetárias {existing_monetary_cols} (vectorized)...")
-
-        # Conversão vetorizada por coluna (DataFrame não tem .str, mas Series sim)
-        for col in existing_monetary_cols:
-            df[col] = (
-                df[col]
-                .fillna('0')
-                .astype(str)
-                .str.replace('.', '', regex=False)
-                .str.replace(',', '.', regex=False)
-                .replace({'': '0', 'na': '0', 'n/a': '0', 'nan': '0'})
-                .astype(float)
-            )
-
-        # Logging básico de amostra
-        for col in existing_monetary_cols:
+    
+    # Converter colunas monetárias no DataFrame antes de serializar
+    for col in monetary_columns:
+        if col in df.columns:
+            logger.info(f"💰 Processando coluna '{col}'...")
+            
+            # Função para converter cada valor
+            def clean_monetary_value(val):
+                """Limpa e converte um valor monetário (string ou numérico) para float."""
+                if pd.isna(val) or val is None or val == '':
+                    return 0.0
+                
+                if isinstance(val, (int, float)):
+                    return float(val)
+                
+                if isinstance(val, str):
+                    try:
+                        clean_val = str(val).strip()
+                        # Lógica para formato brasileiro: "1.234,56" → "1234.56"
+                        clean_val = clean_val.replace('.', '').replace(',', '.')
+                        
+                        if not clean_val or clean_val.lower() in ['na', 'n/a', 'nan']:
+                            return 0.0
+                        
+                        return float(clean_val)
+                    except (ValueError, TypeError):
+                        logger.warning(f"⚠️ Não foi possível converter o valor monetário '{val}' para número.")
+                        return 0.0
+                
+                return 0.0
+            
+            # Aplicar conversão na coluna inteira (usando .loc para evitar SettingWithCopyWarning)
+            df.loc[:, col] = df[col].apply(clean_monetary_value)
+            
+            # Log de amostra
             sample_values = df[col].head(3).tolist()
             non_zero_count = (df[col] > 0).sum()
             logger.info(f"   Amostra de '{col}': {sample_values}")
             logger.info(f"   Valores > 0: {non_zero_count}/{len(df)}")
-
-    # -------- 2. Serializar para records primeiro --------
+    
+    # Converter DataFrame para JSON
     records = df.to_dict('records')
-
-    # -------- 3. Normalizar campos mantendo compatibilidade --------
+    
+    # NORMALIZAÇÃO DE CAMPOS: Converter nomes ETL → Frontend
     logger.info(f"🔄 Normalizando nomes de campos para o frontend...")
     normalized_records = []
     
@@ -439,15 +452,15 @@ def convert_dataframe_to_json(df: pd.DataFrame) -> List[Dict]:
         normalized_records.append(normalized_record)
     
     logger.info(f"✅ Normalização concluída: {len(normalized_records)} registros")
-
-    # -------- 4. Cache --------
+    
+    # Salvar no cache para futuras requisições
     _json_conversion_cache[df_hash] = {
         'data': normalized_records,
         'timestamp': utc_now(),
-        'size': len(normalized_records),
+        'size': len(normalized_records)
     }
-
-    logger.info(f"✅ Conversão finalizada e cache salvo: {df_hash[:8]}...")
+    
+    logger.info(f"✅ Conversão concluída: {len(normalized_records)} registros (cache salvo: {df_hash[:8]}...)")
     return normalized_records
 
 @app.get("/")
